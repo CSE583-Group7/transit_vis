@@ -6,27 +6,27 @@ Transit delays are unavoidable, and transit agencies often plan for them through
 ## User Profile
 Our target users fall into two main groups; professionals who would like to draw high-level insights on transit delays in Seattle, and community members who want information on transit delays in particular neighborhoods.
 
-Professionals:
+**Professionals:**<br>
 This group of users has background knowledge on transit operations in the Seattle area, but are not necessarily programmers or computer scientists. These users are interested in understanding where transit delays occur, and who they impact. Our tool should provide them with the means to explore our datasets, and perform their own analytical work on the underlying data.
 
-Community Members:
+**Community Members:**<br>
 This group of users has minimal background knowledge on transit operations or programming. They are not interested in re-using the data outside of our tool, or drawing insights outside of the visualization itself. These users are looking for a quick, easy tool interface that will tell them what they need to know about transit delays in a neighborhood of interest.
 
 ## Data Sources
-Bus Delays:
+**Bus Delays:**<br>
 The foundation of our tool is a dataset scraped daily from the OneBusAway API. This data contains variables for bus identifiers, locations, delays, times, and distances along trips. This data is scraped at a 10 second rate between the hours of 6AM and 8PM. In order to determine transit speeds, we take individual tracked locations and determine the distance between them, and the time it took to traverse that distance. This data is then aggregated to routes and segments. This data is scraped by an AWS EC2 instance and stored in AWS RDS running PostgreSQL. The dataset itself is quite large, and our tool necessitates quick quierying and interaction. For that reason, each day's data is queried at the end of the day and summarized in a dynamoDB instance, which then directly interfaces with our application.
 
-Socioeconomic Census Data:
+**Socioeconomic Census Data:**<br>
 Our tool overlays socioeconomic data at the census tract level across King County. This data is drawn from the American Community Survey (ACS) data tables for basic economic and demographic statistics. ACS data is aggregated by various geographies, and in the future a lower resolution (block groups or smaller) could be used to see a finer grained visualization. ACS data itself is drawn from the 2017, 5-year census survey which is the most up-to-date version available, which still contains the complete set of data tables at the census tract level.
 
-Shapefiles:
+**Shapefiles:**<br>
 To facilitate the visualization of our data, we use Python libraries to plot shapefiles stored in .geojson format. We use 2 shapefiles each containing many features. The first contains the complete set of bus routes operated by King County Metro. Not all of these routes are current, so a grey, transparent color scheme is applied to routes in the visualization that do not have data. The second shapefile contains census tract shapes for all tracts in King County. These shapes are overlaid on the map and given a color scheme according to their underlying socioeconomic data. Beneath both shapefiles, our visualization uses the OpenStreetMap basemap tiles.
 
 ## Use Cases
-1) Professional user wishes to view transit speeds throughout a particular corridor on the map, and compare them to historic levels.
-a. In this case, the user's objective is to get data for a specific location on our map, and download that data for their own analysis. 
+1) Professional user wishes to view transit speeds throughout a particular corridor on the map, and compare them to historic levels.<br>
+a. In this case, the user's objective is to get data for a specific location on our map, and download that data for their own analysis.<br>
 b. The user will achieve this by viewing our map, zooming in to the location of interest, and selecting segments/stops within their analysis corridor. We will allow them to do this through filtering widgets, and mouse based selection on the visualization map. One such filter will be a timeline across which to display average speeds for a segment. Once a subset of our data is selected through the map interface, the user will be able to click a button to  download the underlying data in .csv format, so that they can use it with other data for further analysis.
 
-2) Community Member wishes to view typical transit speeds in different neighborhoods, for the sake of choosing a place to live within a specific commute time.
-a. In this case, the user's objective is to estimate a transit accessibility radius from a particular point on the map. This will allow them to choose a work location and commute time, and determine a range of neighborhoods that are accessible by transit.
+2) Community Member wishes to view typical transit speeds in different neighborhoods, for the sake of choosing a place to live within a specific commute time.<br>
+a. In this case, the user's objective is to estimate a transit accessibility radius from a particular point on the map. This will allow them to choose a work location and commute time, and determine a range of neighborhoods that are accessible by transit.<br>
 b. The user will achieve this by selecting a location on the map, and clicking a button to display the accessibility radius. Our tool will do all of the work on the backend, by gathering transit speeds for nearby segments, and creating an estimate for how far someone might be able to travel in the specified time. The output will be accessibility radius, which will be displayed on the map.
