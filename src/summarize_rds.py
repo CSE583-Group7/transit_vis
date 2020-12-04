@@ -232,5 +232,5 @@ def main_function(dynamodb_table_name, rds_limit):
     success = upload_to_dynamo(table, daily_results)
     return success
 
-num_segments_updated = main_function('KCM_Bus_Routes_Modified', 1000)
+num_segments_updated = main_function('KCM_Bus_Routes_Modified_Production', 0)
 print(f"Number of segments updated: {num_segments_updated}")

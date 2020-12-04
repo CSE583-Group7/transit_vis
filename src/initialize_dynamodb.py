@@ -21,7 +21,6 @@ def sort_and_save_exploded_lines(exploded_geojson_name, output_folder):
         else:
             label_sorted[k].append(datapoint)
 
-
     for key in label_sorted.keys():
         # Open file specific to each label
         with open(f"{output_folder}/label_{key}.json", "w+") as outfile:
@@ -157,7 +156,7 @@ def upload_segments_to_dynamo(dynamodb_resource, table_name, kcm_routes):
             })
     return 1
 
-def main_function(exploded_geojson_name, label_folder_name, dynamodb_table_name):
+def main_function(exploded_geojson_name, label_folder_name, dynamodb_table_name, min_segment_length):
     # Create folder to store labels if it doesn't exist
     try:
         os.mkdir(label_folder_name, mode = 0o777)
@@ -167,7 +166,7 @@ def main_function(exploded_geojson_name, label_folder_name, dynamodb_table_name)
     print("Sorting and saving lines...")
     sort_and_save_exploded_lines(exploded_geojson_name, label_folder_name)
     print("Joining lines into feature list...")
-    feature_list, isolated_list, keys = join_line_segments(label_folder_name, 100)
+    feature_list, isolated_list, keys = join_line_segments(label_folder_name, min_segment_length)
     print("Saving feature list to KCM geojson...")
     with open(f"{exploded_geojson_name}.geojson", 'r') as f:
         kcm_routes = json.load(f)
@@ -192,5 +191,5 @@ def main_function(exploded_geojson_name, label_folder_name, dynamodb_table_name)
     # Return the number of features that are in the kcm data
     return len(kcm_routes['features'])    
 
-num_features = main_function('../data/kcm_routes_exploded', '../data/sorted_labels', 'KCM_Bus_Routes_Modified_test')
+num_features = main_function('../data/kcm_routes_exploded', '../data/sorted_labels', 'KCM_Bus_Routes_Modified_Production', 720)
 print(f"{num_features} features in data uploaded to dynamodb")
