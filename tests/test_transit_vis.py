@@ -10,7 +10,7 @@ import unittest
 
 import branca.colormap as cm
 
-from src import transit_vis
+from src import vis_functions
 
 
 class TestTransitVis(unittest.TestCase):
@@ -26,7 +26,7 @@ class TestTransitVis(unittest.TestCase):
         s1902_path = './data/s1902'
         tract_shapes_path = './data/seattle_census_tracts_2010'
 
-        assert transit_vis.write_census_data_to_geojson(s0801_path,\
+        assert vis_functions.write_census_data_to_geojson(s0801_path,\
                                                         s1902_path,\
                                                         tract_shapes_path)\
                                                         is not None
@@ -42,10 +42,26 @@ class TestTransitVis(unittest.TestCase):
                                       vmin=0.5,\
                                       vmax=100.)
 
-        assert transit_vis.generate_folium_map(segment_file,\
+        assert vis_functions.generate_folium_map(segment_file,\
                                                census_file, linear_cm) \
                                                         is not None                                                        
                                                         
+    def test_save_and_view_map(cls):
+        """
+        Smoke test for the module 'save_and_view_map'
+        """
+        
+        segment_file = './data/kcm_routes_exploded_modified'
+        census_file = './data/seattle_census_tracts_2010'
+        linear_cm = cm.LinearColormap(['red', 'green'],\
+                                      vmin=0.5,\
+                                      vmax=100.)
+            
+        f_map = vis_functions.generate_folium_map(segment_file,census_file, linear_cm)
+        output_map_file = 'output_map' 
+
+        assert vis_functions.save_and_view_map(f_map, output_map_file) \
+                                                        is not None                                                          
 
 ##############################################################################
 
