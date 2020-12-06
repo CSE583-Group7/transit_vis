@@ -24,7 +24,7 @@ class TestTransitVis(unittest.TestCase):
         """
         s0801_path = './data/s0801'
         s1902_path = './data/s1902'
-        tract_shapes_path = './data/seattle_census_tracts_2010'
+        tract_shapes_path = './tests/seattle_census_tracts_2010'
 
         assert vis_functions.write_census_data_to_geojson(s0801_path,\
                                                         s1902_path,\
@@ -37,7 +37,7 @@ class TestTransitVis(unittest.TestCase):
         """
         
         segment_file = './tests/kcm_routes_exploded_modified'
-        census_file = './data/seattle_census_tracts_2010'
+        census_file = './tests/seattle_census_tracts_2010'
         linear_cm = cm.LinearColormap(['red', 'green'],\
                                       vmin=0.5,\
                                       vmax=100.)
@@ -52,7 +52,7 @@ class TestTransitVis(unittest.TestCase):
         """
         
         segment_file = './tests/kcm_routes_exploded_modified'
-        census_file = './data/seattle_census_tracts_2010'
+        census_file = './tests/seattle_census_tracts_2010'
         linear_cm = cm.LinearColormap(['red', 'green'],\
                                       vmin=0.5,\
                                       vmax=100.)
