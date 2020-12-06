@@ -28,29 +28,25 @@ import config as cfg
 
 
 def convert_cursor_to_tabular(query_result_cursor):
-    """Uploads the segments in a geojson file to a specified dynamodb table.
+    """Converts a cursor returned by a SQL execution to a Pandas dataframe.
 
-    Goes thorugh each of the features in a geojson file, and creates a new item
-    for that feature on dynamodb. The key is set based on route and segment id.
-    A field is created for average speed and initialized to 0. An array field
-    is created for past speeds and initialized empty. When summarize_rds.py is
-    run, it will append the average daily speed to the historic speeds list and
-    set the new average speed to that day's speed.
+    First iterates through the cursor and dumps all of the contents into a numpy
+    array for easier access. Then, a dataframe is created and grown to store the
+    full contents of the cursor. This function's main purpose is to make the
+    query results easier to work with in other functions. It may slow down the
+    processing especially if extremely large (>24hrs) queries are made.
     
     Args:
-        dynamodb_resource: A boto3 Resource pointing to the AWS account on which
-            the table should be created.
-        table_name: A string containing the name for the segments table.
-        kcm_routes: A geojson object containing the features that should be
-            uploaded. Each feature must have a [route_id] and a [segment_id]
-            property. Although this object also contains all of the geometry,
-            only the route and segment ids will be uploaded. The Folium map will
-            read the speeds from the databse and rejoin them to this file
-            locally for display.
+        query_result_cursor: A Psycopg Cursor object pointing to the first
+            result from a query for bus locations from the data warehouse. The
+            results should contain columns for tripid, vehicleid, orientation,
+            scheduledeviation, locationtime, and collectedtime.
 
-    Returns: 1 when the features are finished uploading to the table.
+    Returns:
+        A Pandas Dataframe object containing the query results in tabular
+        form.
     """
-    # Pull out the variables from the query result cursor
+    # Pull out all the variables from the query result cursor and store in array
     all_tracks = []
     for record in query_result_cursor:
         track = []
@@ -58,7 +54,7 @@ def convert_cursor_to_tabular(query_result_cursor):
             track = np.append(track, feature)
         all_tracks.append(track)
 
-    # Convert variables to Pandas and return
+    # Convert variables integers, store in Pandas, and return
     daily_results = pd.DataFrame(all_tracks)
     colnames = []
     for col in query_result_cursor.description:
@@ -73,12 +69,16 @@ def convert_cursor_to_tabular(query_result_cursor):
     daily_results['collectedtime'] = daily_results['collectedtime'].astype(int)
     return daily_results
 
-def load_modified_geojson(path_to_geojson):
-    with open(path_to_geojson, 'r') as f:
-        kcm_routes = json.load(f)
-    return kcm_routes
-
 def connect_to_rds():
+    """Connects to the RDS data warehouse specified in config.py.
+
+    Attempts to connect to the database, and if successful it returns a
+    connection object that can be used for queries to the bus location data.
+
+    Returns:
+        A Psycopg Connection object for the RDS data warehouse specified in
+        config.py.
+    """
     try:
         conn = psycopg2.connect(
         host=cfg.HOST,
@@ -90,6 +90,27 @@ def connect_to_rds():
     return conn
 
 def get_last_24hrs_results(conn, rds_limit):
+    """Queries the last 24 hours worth of data from the RDS data warehouse.
+
+    Uses the database connection to execute a query for the last 24 hours of
+    bus coordinates stored in the RDS data warehouse. The RDS data must have a
+    column for collected time (in epoch format) which is used to determine the
+    time. The query is made based on the current system time, so it will count
+    24 hours back from the present on the current system. All time comparisons
+    between the RDS and the system are done in epoch time, so there should be no
+    concern for time zone differences if running this function from an EC2
+    instance.
+
+    Args:
+        conn: A Psycopg Connection object for the RDS data warehouse.
+        rds_limit: An integer specifying the maximum number of rows to query.
+            Useful for debugging and checking output before making larger
+            queries. Set to 0 for no limit.
+
+    Returns:
+        A Pandas Dataframe object containing the results in the database for the
+        last 24 hour period.
+    """
     # Query the last 24 hours of data from the RDS database
     end_time = round(datetime.now().timestamp())
     start_time = end_time - (24*60*60)
@@ -103,7 +124,17 @@ def get_last_24hrs_results(conn, rds_limit):
     return daily_results
 
 def update_gtfs_route_info():
-    # Get the latest GTFS route - trip data from the KCM FTP server
+    """Downloads the latest trip-route conversions from the KCM GTFS feed.
+
+    Connects to the King County Metro GTFS server and requests the latest GTFS
+    files. Saves the files in .zip format and then extracts their content to a
+    folder named 'google transit'. This will be used when assigning route ids to
+    the bus coordinate data from RDS, so that they can then be aggregated to
+    matching segments.
+
+    Returns:
+        1 when the download and unzipping process is complete.
+    """
     url = 'http://metro.kingcounty.gov/GTFS/google_transit.zip'
     r = requests.get(url, allow_redirects=True)
     open('../data/google_transit.zip', 'wb').write(r.content)
@@ -112,6 +143,25 @@ def update_gtfs_route_info():
     return 1
 
 def preprocess_trip_data(daily_results):
+    """Cleans the tabular trip data and calculates average speed.
+
+    Removes rows with duplicated tripid, locationid columns from the data. These
+    rows are times where the OneBusAway API was queried faster than the bus
+    location was updated, creating duplicate info. Buses update at around 30s
+    intervals and the API is queried at 10s intervals so there is a large amount
+    of duplicate data. Speeds are calculated between consecutive bus locations
+    based on the distance traveled and the time between those locations. Speeds
+    that are below 0 m/s, or above 30 m/s are assumed to be GPS multipathing or
+    other recording errors and are removed.
+
+    Args:
+        daily_results: A Pandas Dataframe object containing bus location, time,
+            and other RDS data.
+
+    Returns:
+        A Pandas Dataframe object containing the cleaned set of results with an
+        additional column named 'avg_speed_m_s'.
+    """
     # Remove duplicate trip locations
     daily_results.drop_duplicates(subset=['tripid','locationtime'], inplace=True)
     daily_results.sort_values(by=['tripid','locationtime'], inplace=True)
@@ -133,28 +183,62 @@ def preprocess_trip_data(daily_results):
     daily_results.loc[:,'time_diff'] = daily_results['locationtime'] - daily_results['prev_locationtime']
     daily_results.loc[:,'avg_speed_m_s'] = daily_results['dist_diff'] / daily_results['time_diff']
 
-    # Remove rows where speed is below 0 or above 30 and round to one decimal place
+    # Remove rows where speed is below 0 or above 30 and round
     daily_results = daily_results[daily_results['avg_speed_m_s'] >= 0]
     daily_results = daily_results[daily_results['avg_speed_m_s'] <= 30]
     daily_results.loc[:,'avg_speed_m_s'] = round(daily_results.loc[:,'avg_speed_m_s'])
+
     return daily_results
 
 def route_ids_to_keys(daily_results):
-    # Concat 1 or 0 to the route id to make it fit with dynamoDB key schema
+    """Adds a 0 or 1 to route id based on whether route is local or express.
+
+    Concatenates a 0 to the end of a route id if it is a local route, or a 1 to
+    the end of the route id if it is an express route. This allows route id to
+    become a unique identifier for every route in the King County Metro network.
+    This is necessary because dynamodb only supports composite keys with 2
+    values, and the schema uses segment_id as the second value.
+    
+    Args:
+        kcm_routes: A Pandas Dataframe object that has trip_short_name and
+            route_id columns.
+
+    Returns:
+        The same Dataframe object passed, but with new route ids that contain 1
+        additional digit (0 for LOCAL, 1 for EXPRESS trip_short_name).
+    """
     daily_results.loc[daily_results['trip_short_name']=='LOCAL', 'route_id'] = daily_results['route_id'].apply(lambda x:
                                                                                                                int(str(x) + '0'))
     daily_results.loc[daily_results['trip_short_name']=='EXPRESS', 'route_id'] = daily_results['route_id'].apply(lambda x:
                                                                                                                  int(str(x) + '1'))
     return daily_results
 
-def get_nearest(src_points, candidates, k_neighbors=1):
-    """Find nearest neighbors for all source points from a set of candidate points"""
+def get_nearest(src_points, candidates):
+    """Find nearest neighbors for all source points from a set of candidates.
 
+    Taken from:
+    https://automating-gis-processes.github.io/site/notebooks/L3/nearest-neighbor-faster.html
+    Uses a BallTree implementation from sklearn to find closest points between a
+    list of source and candidate points in an efficient manner. Uses Haversine
+    (great sphere) distance, which means points should be in lat/lon coordinate
+    format.
+    
+    Args:
+        src_points: A Pandas Dataframe consisting of 2 columns named 'lat' and
+            'lon'. Each row is a bus coordinate to be assigned.
+        candidates: A Pandas Dataframe consisting of 2 columns named 'lat' and
+            'lon'. Each row is a point within a segment on a bus route.
+
+    Returns:
+        A tuple with 2 lists; the first contains the index of the closest
+        candidate point to each source point, the second contains the distance
+        between those points.
+    """
     # Create tree from the candidate points
     tree = BallTree(candidates, leaf_size=15, metric='haversine')
 
     # Find closest points and distances
-    distances, indices = tree.query(src_points, k=k_neighbors)
+    distances, indices = tree.query(src_points, k=1)
 
     # Transpose to get distances and indices into arrays
     distances = distances.transpose()
@@ -167,7 +251,25 @@ def get_nearest(src_points, candidates, k_neighbors=1):
     return (closest_idx, closest_dist)
 
 def assign_results_to_segments(kcm_routes, daily_results):
-    # Convert segment data from json format to tabular, so that it can be used with nearest neighbors function
+    """Assigns each of the bus locations from the RDS to the closest segment.
+
+    Assigns each location that a bus was tracked at to its closest segment by
+    using the get_nearest function to calculate distances between bus locations
+    and points on segments in the routes geojson. A bus location can only be
+    assigned to a line segment from the route that it belongs to.
+    
+    Args:
+        kcm_routes: A geojson file (generated during initialize_dynamodb.py)
+            that contains features for each route meeting a minimum length. Must
+            have [route_id] and [segment_id] identifier elements.
+        daily_results: A Pandas Dataframe containing the preprocessed data
+            queried from the RDS data warehouse.
+
+    Returns:
+        A Pandas Dataframe containing the bus location data passed with
+        additional columns for the closest route and segment ids.
+    """
+    # Convert segment data from json format to tabular
     feature_coords = []
     route_ids = []
     seg_ids = []
@@ -182,27 +284,32 @@ def assign_results_to_segments(kcm_routes, daily_results):
     segments['lat'] = np.array(feature_coords)[:,0]
     segments['lon'] = np.array(feature_coords)[:,1]
 
-    # Go route by route, adding all data points collected from the database to their closest segment that shares their route_id
     to_upload = pd.DataFrame()
     route_list = pd.unique(daily_results['route_id'])
     for route in route_list:
         route_results = daily_results[daily_results['route_id']==route]
         route_segments = segments[segments['route_id']==route].reset_index()
-
-        # Use closest index returned by get_nearest to join the closest segment info back to each datapoint
         if len(route_results) > 0 and len(route_segments) > 0:
-            result_idxs, result_dists = get_nearest(route_results[['lat', 'lon']], route_segments[['lat', 'lon']])
+            result_idxs, result_dists = get_nearest(route_results[['lat', 'lon']], 
+                                                   route_segments[['lat', 'lon']])
             route_results = route_results.reset_index().join(route_segments.loc[result_idxs,:].reset_index(), rsuffix='_seg')
             to_upload = to_upload.append(route_results)
         else:
-            # A route was tracked by OneBusAway that does not have an id in the King County Metro shapefile
             print(f"Route {route} was either not tracked, or does not have an id in the KCM shapefile")
             result_idxs = -1
             result_dists = -1
     return to_upload
 
 def connect_to_dynamo_table(table_name):
-    # Set up the connection to the Dynamodb database
+    """Connects to the dynamodb table specified using details from config.py.
+
+    Uses the AWS login information stored in config.py to attempt a connection
+    to dynamodb using the boto3 library, then creates a connection to the
+    specified table.
+
+    Returns:
+        A boto3 Table object pointing to the dynamodb table specified.
+    """
     try:
         dynamodb = boto3.resource('dynamodb',
                                  region_name=cfg.REGION,
@@ -214,14 +321,31 @@ def connect_to_dynamo_table(table_name):
     return table
 
 def upload_to_dynamo(dynamodb_table, to_upload):
-    # Summarize the bus delay data (for now, just get the average speed for the day per segment)
+    """Uploads the speeds gathered and processed from the RDS to dynamodb.
+
+    Groups all bus speed observations by route/segment ids and averages the
+    observed speeds. Uploads the results to dynamodb; replaces avg_speed_m_s
+    with the latest value, and appends to historic_speeds which keeps track of
+    past average daily speeds for each segment.
+
+    Args:
+        dynamodb_table: A boto3 Table pointing to a dynamodb table that has been
+            initialized to contain the same segments as to_upload. 
+        to_upload: A Pandas Dataframe to be uploaded to dynamodb containing
+            route/segment ids, and their average speeds as route_id, segment_id,
+            and avg_speed_m_s.
+
+    Returns:
+        The length of the to_upload argument.
+    """
+    # Aggregate the observed bus speeds by their route/segment ids
     to_upload = to_upload[['route_id', 'segment_id', 'avg_speed_m_s']]
     to_upload = to_upload.groupby(['route_id', 'segment_id']).mean().reset_index()
     to_upload['avg_speed_m_s'] = round(to_upload['avg_speed_m_s'], 1)
     to_upload['avg_speed_m_s'] = to_upload['avg_speed_m_s'].apply(str)
     to_upload = to_upload.to_dict(orient='records')
 
-    # Update each route/segment combination with its avg speed for the day
+    # Update each route/segment id in the dynamodb with its new value
     for track in to_upload:
         response = dynamodb_table.update_item(
             Key={
@@ -237,7 +361,30 @@ def upload_to_dynamo(dynamodb_table, to_upload):
     return len(to_upload)
 
 def main_function(dynamodb_table_name, rds_limit):
-    # Update the current gtfs trip-route info from the King County Metro FTP server
+    """Queries last 24hrs of data from RDS, calculates speeds, and uploads them.
+
+    Runs daily to take the last 24hrs worth of data stored in the data warehouse
+    and summarize it for usage with the Folium map. Speeds for each observed
+    bus location are calculated using consecutive trip distances and times. The
+    speeds are assigned to the closest segment belonging to their route using
+    Haversine distance. The geojson segments used are generated during
+    initialize_dynamodb.py, which guarantees that they will be the same ones
+    that are stored on the dynamodb database, allowing for this script to upload
+    them. The Folium map will then download the speeds and display them using
+    the same geojson file once again.
+    
+    Args:
+        dynamodb_table_name: The name of the table containing the segments that
+            speeds will be matched and uploaded to.
+        rds_limit: An integer specifying the maximum number of rows to query.
+            Useful for debugging and checking output before making larger
+            queries. Set to 0 for no limit.
+
+    Returns:
+        An integer of the number of segments that were updated in the
+        database.
+    """
+    # Update the current gtfs trip-route info from King County Metro
     print("Updating the GTFS files...")
     update_gtfs_route_info()
 
@@ -253,11 +400,13 @@ def main_function(dynamodb_table_name, rds_limit):
     print("Loading shapefile and GTFS files...")
     gtfs_trips = pd.read_csv('../data/google_transit/trips.txt')
     gtfs_trips = gtfs_trips[['route_id', 'trip_id', 'trip_short_name']]
-    kcm_routes = load_modified_geojson('../data/kcm_routes_exploded_modified.geojson')
+    with open('../data/kcm_routes_exploded_modified.geojson', 'r') as f:
+        kcm_routes = json.load(f)
 
-    # Merge scraped data with the gtfs data to assign route_ids to the scraped data, then update route_id to fit dynamodb key schema
+    # Merge scraped data with the gtfs data and alter route ids to fit schema
     print("Merging RDS data with GTFS files...")
-    daily_results = daily_results.merge(gtfs_trips, left_on='tripid', right_on='trip_id')
+    daily_results = daily_results.merge(gtfs_trips, left_on='tripid',
+                                       right_on='trip_id')
     daily_results = route_ids_to_keys(daily_results)
 
     # Match the scraped data to its closest segments in the route shapefile
@@ -270,5 +419,6 @@ def main_function(dynamodb_table_name, rds_limit):
     success = upload_to_dynamo(table, daily_results)
     return success
 
+# Main program starts here
 num_segments_updated = main_function('KCM_Bus_Routes_Modified_Production', 0)
 print(f"Number of segments updated: {num_segments_updated}")

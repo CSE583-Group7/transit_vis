@@ -181,7 +181,8 @@ def connect_to_dynamo():
     Uses the AWS login information stored in config.py to attempt a connection
     to dynamodb using the boto3 library.
 
-    Returns: A boto3 Resource object pointing to dynamodb for the specified
+    Returns:
+        A boto3 Resource object pointing to dynamodb for the specified
         AWS account.
     """
     try:
@@ -207,7 +208,8 @@ def create_dynamo_table(dynamodb_resource, table_name):
             the table should be created.
         table_name: A string containing the name for the segments table.
 
-    Returns: A boto3 Table object pointing to the newly created segments table.
+    Returns:
+        A boto3 Table object pointing to the newly created segments table.
     """
     table = dynamodb_resource.create_table(TableName=table_name,
                                           KeySchema=[
@@ -257,7 +259,8 @@ def upload_segments_to_dynamo(dynamodb_resource, table_name, kcm_routes):
             read the speeds from the databse and rejoin them to this file
             locally for display.
 
-    Returns: 1 when the features are finished uploading to the table.
+    Returns:
+        1 when the features are finished uploading to the table.
     """
     table = dynamodb_resource.Table(table_name)
     # Takes about 1hr to do 70,000 features
@@ -296,7 +299,8 @@ def main_function(exploded_geojson_name,
         min_segment_length: The minimum length (feet) that final features should
             have.
 
-    Returns: An integer of the number of features that were uploaded to the
+    Returns:
+        An integer of the number of features that were uploaded to the
         database.
     """
     # Create folder to store labels if it doesn't exist
