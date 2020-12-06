@@ -1,3 +1,13 @@
+"""Gathers data from dynamodb database and plots it to a Folium Map for display.
+
+This is the main component of the visualization tool. It first gathers data on
+all of the segment stored in the dynamodb, then constructs a Folium map which
+contains both the route segments and census tract-level socioeconomic data taken
+from the American Community Survey. The map is saved as an html file and opened
+in a web browser automatically.
+"""
+
+
 from collections import defaultdict
 import webbrowser
 
@@ -11,7 +21,8 @@ import pandas as pd
 
 import config as cfg
 
-def write_census_data_to_geojson(s0801_path, s1902_path, tract_shapes_path):
+
+def write_census_data_to_csv(s0801_path, s1902_path, tract_shapes_path):
     # Read in the two tables that were taken from the ACS data portal website
     s0801_df = pd.read_csv(f"{s0801_path}.csv")
     s1902_df = pd.read_csv(f"{s1902_path}.csv")
@@ -123,7 +134,7 @@ def save_and_view_map(f_map, output_file):
 def main_function(table_name, s0801_file, s1902_file, segment_file, census_file, output_map_file):
     # Add census data to census tracts in geojson shapefile for Seattle
     print("Modifying and writing census data...")
-    write_census_data_to_geojson(s0801_file, s1902_file, census_file)
+    write_census_data_to_csv(s0801_file, s1902_file, census_file)
 
     # Connect to dynamodb
     print("Connecting to dynamodb...")
