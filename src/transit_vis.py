@@ -153,10 +153,3 @@ def main_function(table_name, s0801_file, s1902_file, segment_file, census_file,
     print("Saving and opening map...")
     save_and_view_map(f_map, output_map_file)
     return 1
-
-main_function('KCM_Bus_Routes_Modified_Production',
-             '../data/s0801',
-             '../data/s1902',
-             '../data/kcm_routes_exploded_modified', 
-             '../data/seattle_census_tracts_2010', 
-             'output_map')
