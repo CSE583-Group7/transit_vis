@@ -1,3 +1,17 @@
+"""Gathers the last 24hrs of speed data, aggregates it, and uploads it.
+
+This module takes speeds from a SQL data-warehouse and summarizes them to then
+upload to the dynamodb database which our visualization draws from. This is
+a necessity because querying large (24hrs+) amounts of data from the warehouse
+can take upwards of 10 minutes, rendering the tool slow and useless. This script
+is run once per day to summarize the daily speeds to the segments created by the
+initialize_dynamodb module, however it is also possible to do many days at once.
+RAM must be managed carefully to avoid OOM errors, so for a 24hr query at least
+3gb is recommended. If using less, the query time period should be split up
+smaller than 24hrs.
+"""
+
+
 from datetime import datetime
 import decimal
 import json
@@ -12,7 +26,30 @@ from sklearn.neighbors import BallTree
 
 import config as cfg
 
+
 def convert_cursor_to_tabular(query_result_cursor):
+    """Uploads the segments in a geojson file to a specified dynamodb table.
+
+    Goes thorugh each of the features in a geojson file, and creates a new item
+    for that feature on dynamodb. The key is set based on route and segment id.
+    A field is created for average speed and initialized to 0. An array field
+    is created for past speeds and initialized empty. When summarize_rds.py is
+    run, it will append the average daily speed to the historic speeds list and
+    set the new average speed to that day's speed.
+    
+    Args:
+        dynamodb_resource: A boto3 Resource pointing to the AWS account on which
+            the table should be created.
+        table_name: A string containing the name for the segments table.
+        kcm_routes: A geojson object containing the features that should be
+            uploaded. Each feature must have a [route_id] and a [segment_id]
+            property. Although this object also contains all of the geometry,
+            only the route and segment ids will be uploaded. The Folium map will
+            read the speeds from the databse and rejoin them to this file
+            locally for display.
+
+    Returns: 1 when the features are finished uploading to the table.
+    """
     # Pull out the variables from the query result cursor
     all_tracks = []
     for record in query_result_cursor:
@@ -20,13 +57,14 @@ def convert_cursor_to_tabular(query_result_cursor):
         for feature in record:
             track = np.append(track, feature)
         all_tracks.append(track)
-        
+
     # Convert variables to Pandas and return
     daily_results = pd.DataFrame(all_tracks)
     colnames = []
     for col in query_result_cursor.description:
         colnames.append(col.name)
     daily_results.columns = colnames
+    daily_results = daily_results.dropna()
     daily_results['tripid'] = daily_results['tripid'].astype(int)
     daily_results['vehicleid'] = daily_results['vehicleid'].astype(int)
     daily_results['orientation'] = daily_results['orientation'].astype(int)
@@ -63,7 +101,7 @@ def get_last_24hrs_results(conn, rds_limit):
         curs.execute(query_text)
         daily_results = convert_cursor_to_tabular(curs)
     return daily_results
-    
+
 def update_gtfs_route_info():
     # Get the latest GTFS route - trip data from the KCM FTP server
     url = 'http://metro.kingcounty.gov/GTFS/google_transit.zip'
@@ -89,7 +127,7 @@ def preprocess_trip_data(daily_results):
     # Remove NA rows, and rows where tripid is different (last recorded location)
     daily_results.loc[daily_results.tripid == daily_results.prev_tripid, 'tripid'] = None
     daily_results.dropna(inplace=True)
-    
+
     # Calculate average speed between each location bus is tracked at
     daily_results.loc[:,'dist_diff'] = daily_results['tripdistance'] - daily_results['prev_tripdistance']
     daily_results.loc[:,'time_diff'] = daily_results['locationtime'] - daily_results['prev_locationtime']
@@ -143,7 +181,7 @@ def assign_results_to_segments(kcm_routes, daily_results):
     segments['segment_id'] = seg_ids
     segments['lat'] = np.array(feature_coords)[:,0]
     segments['lon'] = np.array(feature_coords)[:,1]
-    
+
     # Go route by route, adding all data points collected from the database to their closest segment that shares their route_id
     to_upload = pd.DataFrame()
     route_list = pd.unique(daily_results['route_id'])
@@ -197,7 +235,7 @@ def upload_to_dynamo(dynamodb_table, to_upload):
                 ':empty_list': []
             })
     return len(to_upload)
-    
+
 def main_function(dynamodb_table_name, rds_limit):
     # Update the current gtfs trip-route info from the King County Metro FTP server
     print("Updating the GTFS files...")
@@ -210,7 +248,7 @@ def main_function(dynamodb_table_name, rds_limit):
     daily_results = get_last_24hrs_results(conn, rds_limit)
     print("Finished query; processing RDS data...")
     daily_results = preprocess_trip_data(daily_results)
-    
+
     # Load the gtfs trip-route info and segment shapefile
     print("Loading shapefile and GTFS files...")
     gtfs_trips = pd.read_csv('../data/google_transit/trips.txt')
@@ -221,7 +259,7 @@ def main_function(dynamodb_table_name, rds_limit):
     print("Merging RDS data with GTFS files...")
     daily_results = daily_results.merge(gtfs_trips, left_on='tripid', right_on='trip_id')
     daily_results = route_ids_to_keys(daily_results)
-    
+
     # Match the scraped data to its closest segments in the route shapefile
     print("Matching RDS data to nearest segments in shapefile...")
     daily_results = assign_results_to_segments(kcm_routes, daily_results)
