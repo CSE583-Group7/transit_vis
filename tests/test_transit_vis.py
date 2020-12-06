@@ -46,22 +46,22 @@ class TestTransitVis(unittest.TestCase):
                                                census_file, linear_cm) \
                                                         is not None                                                        
                                                         
-    def test_save_and_view_map(cls):
-        """
-        Smoke test for the module 'save_and_view_map'
-        """
+    # def test_save_and_view_map(cls):
+    #     """
+    #     Smoke test for the module 'save_and_view_map'
+    #     """
         
-        segment_file = './tests/kcm_routes_exploded_modified'
-        census_file = './tests/seattle_census_tracts_2010'
-        linear_cm = cm.LinearColormap(['red', 'green'],\
-                                      vmin=0.5,\
-                                      vmax=100.)
+    #     segment_file = './tests/kcm_routes_exploded_modified'
+    #     census_file = './tests/seattle_census_tracts_2010'
+    #     linear_cm = cm.LinearColormap(['red', 'green'],\
+    #                                   vmin=0.5,\
+    #                                   vmax=100.)
             
-        f_map = vis_functions.generate_folium_map(segment_file,census_file, linear_cm)
-        output_map_file = 'output_map' 
+    #     f_map = vis_functions.generate_folium_map(segment_file,census_file, linear_cm)
+    #     output_map_file = 'output_map' 
 
-        assert vis_functions.save_and_view_map(f_map, output_map_file) \
-                                                        is not None                                                          
+    #     assert vis_functions.save_and_view_map(f_map, output_map_file) \
+    #                                                     is not None                                                          
 
 ##############################################################################
 
