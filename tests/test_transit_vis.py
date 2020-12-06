@@ -36,7 +36,7 @@ class TestTransitVis(unittest.TestCase):
         Smoke test for the module 'transit_vis'
         """
         
-        segment_file = './data/kcm_routes_exploded_modified'
+        segment_file = './tests/kcm_routes_exploded_modified'
         census_file = './data/seattle_census_tracts_2010'
         linear_cm = cm.LinearColormap(['red', 'green'],\
                                       vmin=0.5,\
@@ -51,7 +51,7 @@ class TestTransitVis(unittest.TestCase):
         Smoke test for the module 'save_and_view_map'
         """
         
-        segment_file = './data/kcm_routes_exploded_modified'
+        segment_file = './tests/kcm_routes_exploded_modified'
         census_file = './data/seattle_census_tracts_2010'
         linear_cm = cm.LinearColormap(['red', 'green'],\
                                       vmin=0.5,\
