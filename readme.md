@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/CSE583-Group7/transit_vis.svg?branch=main)](https://travis-ci.org/CSE583-Group7/transit_vis)
 ## Where's My Bus?
 Team: Zack Aemmer, Kelly Balmes, Alex Goldstein, Steven Wilson | CSE 583 Software Development for Data Scientists
 
