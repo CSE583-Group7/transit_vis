@@ -307,6 +307,9 @@ def connect_to_dynamo_table(table_name):
     to dynamodb using the boto3 library, then creates a connection to the
     specified table.
 
+    Args:
+        table_name: The name of the table on the dynamodb resource to connect.
+
     Returns:
         A boto3 Table object pointing to the dynamodb table specified.
     """
