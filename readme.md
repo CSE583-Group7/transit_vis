@@ -38,4 +38,5 @@ transit_vis/
 * obtain a copy of config.py
 * Run: python3 initialize_dynamodb.py
 * Run Daily: python3 summarize_rds.py
-* Run: transit_vis.py
+* Run: python3 generate_transit_vis_map.py
+* open output_map.html (including local filepath) into any browser to display output data
