@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 """ Class to test the repository 'transit_vis'
 
-test_smoke(cls) -- smoke test
+test_smoke_census(cls) -- smoke test for writing census data to geoJSON
+
+test_oneshot_census(self) -- one-shot test for writing census data to geoJSON
+
+test_smoke_folium_map(cls) -- smoke test for generating folium map
 
 """
 
@@ -12,57 +16,48 @@ import branca.colormap as cm
 
 from src import vis_functions
 
+S0801_PATH = './data/s0801'
+S1902_PATH = './data/s1902'
+SEGMENT_FILE = './tests/kcm_routes_exploded_modified'
+CENSUS_FILE = './tests/seattle_census_tracts_2010'
+LINEAR_CM = cm.LinearColormap(['red', 'green'],\
+                              vmin=0.5,\
+                              vmax=100.)
 
 class TestTransitVis(unittest.TestCase):
     """
-    Unittest for the module 'transit_vis'
+    Unittest for the module 'vis_functions'
     """
     @classmethod
     def test_smoke_census(cls):
         """
         Smoke test for the function 'write_census_data_to_geojson'
         """
-        s0801_path = './data/s0801'
-        s1902_path = './data/s1902'
-        tract_shapes_path = './tests/seattle_census_tracts_2010'
 
-        assert vis_functions.write_census_data_to_geojson(s0801_path,\
-                                                        s1902_path,\
-                                                        tract_shapes_path)\
+        assert vis_functions.write_census_data_to_geojson(S0801_PATH,\
+                                                        S1902_PATH,\
+                                                        CENSUS_FILE)\
                                                         is not None
+    def test_oneshot_census(self):
+        """
+        One shot test for the function 'write_census_data_to_geojson'
+        """
 
+        self.assertAlmostEqual(vis_functions.write_census_data_to_geojson(\
+                                                        S0801_PATH,\
+                                                        S1902_PATH,\
+                                                        CENSUS_FILE), 1)
+
+    @classmethod
     def test_smoke_folium_map(cls):
         """
-        Smoke test for the module 'transit_vis'
+        Smoke test for the function 'generate_folium_map'
         """
-        
-        segment_file = './tests/kcm_routes_exploded_modified'
-        census_file = './tests/seattle_census_tracts_2010'
-        linear_cm = cm.LinearColormap(['red', 'green'],\
-                                      vmin=0.5,\
-                                      vmax=100.)
 
-        assert vis_functions.generate_folium_map(segment_file,\
-                                               census_file, linear_cm) \
-                                                        is not None                                                        
-                                                        
-    # def test_save_and_view_map(cls):
-    #     """
-    #     Smoke test for the module 'save_and_view_map'
-    #     """
-        
-    #     segment_file = './tests/kcm_routes_exploded_modified'
-    #     census_file = './tests/seattle_census_tracts_2010'
-    #     linear_cm = cm.LinearColormap(['red', 'green'],\
-    #                                   vmin=0.5,\
-    #                                   vmax=100.)
-            
-    #     f_map = vis_functions.generate_folium_map(segment_file,census_file, linear_cm)
-    #     output_map_file = 'output_map' 
-
-    #     assert vis_functions.save_and_view_map(f_map, output_map_file) \
-    #                                                     is not None                                                          
-
+        assert vis_functions.generate_folium_map(SEGMENT_FILE,\
+                                                CENSUS_FILE,\
+                                                LINEAR_CM) \
+                                                is not None
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestTransitVis)
