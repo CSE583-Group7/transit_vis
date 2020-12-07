@@ -31,19 +31,19 @@ class TestTransitVis(unittest.TestCase):
     @classmethod
     def test_smoke_census(cls):
         """
-        Smoke test for the function 'write_census_data_to_geojson'
+        Smoke test for the function 'write_census_data_to_csv'
         """
 
-        assert vis_functions.write_census_data_to_geojson(S0801_PATH,\
+        assert vis_functions.write_census_data_to_csv(S0801_PATH,\
                                                         S1902_PATH,\
                                                         CENSUS_FILE)\
                                                         is not None
     def test_oneshot_census(self):
         """
-        One shot test for the function 'write_census_data_to_geojson'
+        One shot test for the function 'write_census_data_to_csv'
         """
 
-        self.assertAlmostEqual(vis_functions.write_census_data_to_geojson(\
+        self.assertAlmostEqual(vis_functions.write_census_data_to_csv(\
                                                         S0801_PATH,\
                                                         S1902_PATH,\
                                                         CENSUS_FILE), 1)
@@ -58,6 +58,29 @@ class TestTransitVis(unittest.TestCase):
                                                 CENSUS_FILE,\
                                                 LINEAR_CM) \
                                                 is not None
+                                                
+    @classmethod
+    def test_smoke_save_map(cls):
+        """
+        Smoke test for the function 'save_and_view_map'
+        """
+        f_map = vis_functions.generate_folium_map(SEGMENT_FILE,\
+                                                CENSUS_FILE,\
+                                                LINEAR_CM)
+        output_file = 'output_map'
+        assert vis_functions.save_and_view_map(f_map, output_file) \
+                                                is not None    
+                                                
+    def test_oneshot_save_map(self):
+        """
+        One-shot test for the function 'save_and_view_map'
+        """
+        f_map = vis_functions.generate_folium_map(SEGMENT_FILE,\
+                                                CENSUS_FILE,\
+                                                LINEAR_CM)
+        output_file = 'output_map'
+        self.assertAlmostEqual(vis_functions.save_and_view_map(\
+                                               f_map, output_file), 1)                                             
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestTransitVis)
