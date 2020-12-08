@@ -170,10 +170,10 @@ def main_function(table_name,
 
     # Create the color mapping for speeds
     print("Generating map...")
-    linear_cm = cm.LinearColormap(['red', 'green'],
-                                  vmin=np.percentile(speeds, 1),
-                                  vmax=np.percentile(speeds, 75))
-    
+    linear_cm = cm.LinearColormap(['red', 'yellow', 'green'],
+                                  vmin=0.0,
+                                  vmax=np.ceil(np.percentile(speeds[speeds>0.0], 95)))    
+
     f_map = vis_functions.generate_folium_map(segment_file, census_file, linear_cm)
     print("Saving and opening map...")
     vis_functions.save_and_view_map(f_map, output_map_file)
