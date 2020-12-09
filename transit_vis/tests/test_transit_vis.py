@@ -14,12 +14,12 @@ import unittest
 
 import branca.colormap as cm
 
-from src import vis_functions
+from transit_vis.src import vis_functions
 
-S0801_PATH = './data/s0801'
-S1902_PATH = './data/s1902'
-SEGMENT_FILE = './tests/kcm_routes_exploded_modified'
-CENSUS_FILE = './tests/seattle_census_tracts_2010'
+S0801_PATH = './transit_vis/data/s0801'
+S1902_PATH = './transit_vis/data/s1902'
+SEGMENT_FILE = './transit_vis/tests/kcm_routes_exploded_modified'
+CENSUS_FILE = './transit_vis/tests/seattle_census_tracts_2010'
 LINEAR_CM = cm.LinearColormap(['red', 'green'],\
                               vmin=0.5,\
                               vmax=100.)
