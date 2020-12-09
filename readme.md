@@ -11,19 +11,20 @@ Transit delays are unavoidable, and transit agencies often plan for them through
 transit_vis/
   |- readme.md
   |- license.md
-  |- src/
-     |- generate_transit_vis_map.py
-     |- initialize_dynamodb.py
-     |- summarize_rds.py
-     |- transit_vis.py
-     |- vis_functions.py
-  |- tests/
+  |- transit_vis/  
+     |- src/
+        |- generate_transit_vis_map.py
+        |- initialize_dynamodb.py
+        |- summarize_rds.py
+        |- transit_vis.py
+        |- vis_functions.py
+     |- tests/
         |- test_transit_vis.py
-  |- data/
-     |- kcm_routes_exploded_modified.geojson
-     |- s0801.csv
-     |- s1902.csv
-     |- seattle_census_tracts.geojson
+     |- data/
+        |- kcm_routes_exploded_modified.geojson
+        |- s0801.csv
+        |- s1902.csv
+        |- seattle_census_tracts.geojson
   |- oba_scraping/
      |- database.sql
      |- pipeline.R
@@ -40,4 +41,4 @@ transit_vis/
 * Run: python3 initialize_dynamodb.py
 * Run Daily: python3 summarize_rds.py
 * Run: python3 generate_transit_vis_map.py
-* open output_map.html (including local filepath) into any browser to display output data
+* open output_map.html (including local file path) into any browser to display output data
