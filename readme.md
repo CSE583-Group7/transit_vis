@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/CSE583-Group7/transit_vis.svg?branch=main)](https://travis-ci.org/CSE583-Group7/transit_vis)
+[![Coverage Status](https://coveralls.io/repos/github/CSE583-Group7/transit_vis/badge.svg?branch=main)](https://coveralls.io/github/CSE583-Group7/transit_vis?branch=main)
 ## Where's My Bus?
 Team: Zack Aemmer, Kelly Balmes, Alex Goldstein, Steven Wilson | CSE 583 Software Development for Data Scientists
 
@@ -24,11 +25,6 @@ transit_vis/
         |- s0801.csv
         |- s1902.csv
         |- seattle_census_tracts.geojson
-  |- oba_scraping/
-     |- database.sql
-     |- pipeline.R
-     |- scrape_oba.R
-     |- update_dynamodb.R
   |- docs/
      |- component_specification.md
      |- functional_specification.md
