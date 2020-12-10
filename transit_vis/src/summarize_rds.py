@@ -114,6 +114,12 @@ def get_last_24hrs_results(conn, rds_limit):
     # Query the last 24 hours of data from the RDS database
     end_time = round(datetime.now().timestamp())
     start_time = end_time - (24*60*60)
+    end_time = start_time
+    start_time = end_time - (24*60*60)
+    end_time = start_time
+    start_time = end_time - (24*60*60)
+    end_time = start_time
+    start_time = end_time - (24*60*60)
     if rds_limit > 0:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
     else:
