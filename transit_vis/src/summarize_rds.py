@@ -13,7 +13,6 @@ smaller than 24hrs.
 
 
 from datetime import datetime
-import decimal
 import json
 import requests
 from zipfile import ZipFile

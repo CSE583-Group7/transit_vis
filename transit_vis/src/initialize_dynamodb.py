@@ -12,7 +12,6 @@ import json
 import os
 
 import boto3
-import numpy as np
 
 import config as cfg
 
