@@ -319,7 +319,7 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     return success
 
 # Main program starts here
-num_segments_updated = main_function(dynamodb_table_name='KCM_Bus_Routes_new',
+num_segments_updated = main_function(dynamodb_table_name='KCM_Bus_Routes',
                                     num_days=1,
-                                    rds_limit=10000)
+                                    rds_limit=0)
 print(f"Number of segments updated: {num_segments_updated}")
