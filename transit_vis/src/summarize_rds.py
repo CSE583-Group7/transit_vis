@@ -1,3 +1,5 @@
+# pylint: disable=E1101
+
 """Gathers the last 24hrs of speed data, aggregates it, and uploads it.
 
 This module takes speeds from a SQL data-warehouse and summarizes them to then

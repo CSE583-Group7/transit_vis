@@ -1,3 +1,5 @@
+# pylint: disable=E1101
+
 """Gathers data from dynamodb database and plots it to a Folium Map for display.
 
 This is the main component of the visualization tool. It first gathers data on
