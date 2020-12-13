@@ -132,11 +132,16 @@ def save_and_view_map(f_map, output_file):
     Args:
         f_map: A Folium Map object to be written.
         output_file: A string path to the location where the Folium Map should
-            be saved. Do not include file type ending (.html).
+            be saved. Include file type ending (.html).
 
     Returns:
         1 when done writing and printing the Folium map .html file.
     """
+    if output_file[-5:] == '.html':
+        pass
+    else:
+        raise TypeError('output file must be an html')
+
     f_map.save(f"{output_file}")
     current_directory = os.getcwd()
     print("Map saved, please copy this file path into any browser: "+\
