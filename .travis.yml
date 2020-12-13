@@ -30,11 +30,11 @@ install:
 
 # a list of commands to run before the main script
 #before_script:
-#    - pylint transit_vis/src/generate_transit_vis_map.py
-#    - pylint transit_vis/src/vis_functions.py
-#    - pylint transit_vis/src/transit_vis.py
-#    - pylint transit_vis/src/summarize_rds.py
-#    - pylint transit_vis/src/initialize_dynamodb.py
+    - pylint transit_vis/src/generate_transit_vis_map.py
+    - pylint transit_vis/src/vis_functions.py
+    - pylint transit_vis/src/transit_vis.py
+    - pylint transit_vis/src/summarize_rds.py
+    - pylint transit_vis/src/initialize_dynamodb.py
 
 # the actual commands to run
 script:
