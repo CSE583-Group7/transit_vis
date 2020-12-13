@@ -18,6 +18,8 @@ test_smoke_write_speed(cls) -- smoke test for writing speeds to map
 
 test_oneshot_write_speed(self) -- one shot test for writing speeds to map 
 
+test_edgecase_write_speed(cls) -- edge case to catch invalid input type
+
 """
 
 import unittest
@@ -144,8 +146,8 @@ class TestTransitVis(unittest.TestCase):
     @classmethod
     def test_edgecase_write_speed(cls):
         """
-        Edge case test to catch that speed inputs are a dictionary for the 
-        function 'write_speeds_to_map_segments'
+        Edge case test to catch that speed inputs must be a dictionary and
+        not an array for the function 'write_speeds_to_map_segments'
         """
         SPEED_LOOKUP = np.array([1.0])
 
