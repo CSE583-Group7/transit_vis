@@ -34,7 +34,7 @@ def convert_cursor_to_tabular(query_result_cursor):
     full contents of the cursor. This function's main purpose is to make the
     query results easier to work with in other functions. It may slow down the
     processing especially if extremely large (>24hrs) queries are made.
-    
+
     Args:
         query_result_cursor: A Psycopg Cursor object pointing to the first
             result from a query for bus locations from the data warehouse. The
@@ -78,15 +78,11 @@ def connect_to_rds():
         A Psycopg Connection object for the RDS data warehouse specified in
         config.py.
     """
-    try:
-        conn = psycopg2.connect(
+    conn = psycopg2.connect(
         host=cfg.HOST,
         database=cfg.DATABASE,
         user=cfg.UID,
         password=cfg.PWD)
-    except:
-        print("Error connecting to RDS.")
-        pass
     return conn
 
 def get_last_xdays_results(conn, num_days, rds_limit):
@@ -120,9 +116,11 @@ def get_last_xdays_results(conn, num_days, rds_limit):
         start_time = end_time - (24*60*60)
 
     if rds_limit > 0:
-        query_text = f"SELECT * FROM active_trips_study WHERE collectedtime BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
+        query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
+            "BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
     else:
-        query_text = f"SELECT * FROM active_trips_study WHERE collectedtime BETWEEN {start_time} AND {end_time};"
+        query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
+            "BETWEEN {start_time} AND {end_time};"
     with conn.cursor() as curs:
         curs.execute(query_text)
         daily_results = convert_cursor_to_tabular(curs)

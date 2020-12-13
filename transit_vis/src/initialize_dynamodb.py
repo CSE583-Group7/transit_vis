@@ -8,7 +8,6 @@ aggregate bus speeds to each route, and transit_vis can plot them on a map.
 
 
 import json
-import os
 
 import boto3
 
@@ -21,7 +20,7 @@ def replace_floats(obj):
     Dynamodb does not support float values, which will potentially cause
     problems with lat/lon and other long decimals. This function works with json
     styled nested objects to convert all values to strings for uploading.
-    
+
     Args:
         obj: Object with nested dict/list values to convert to strings.
 
@@ -29,20 +28,16 @@ def replace_floats(obj):
         The same object that was passed, but with all values changed to strings.
     """
     if isinstance(obj, list):
-        for i in range(0,len(obj)):
+        for i, _ in enumerate(obj):
             obj[i] = replace_floats(obj[i])
         return obj
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         for k in obj.keys():
             obj[k] = replace_floats(obj[k])
         return obj
-    elif isinstance(obj, float):
-        if obj % 1 == 0:
-            return int(obj)
-        else:
-            return str(obj)
-    else:
-        return obj
+    if isinstance(obj, float):
+        return str(obj)
+    return obj
 
 def connect_to_dynamo():
     """Connects to the dynamodb resource specified in config.py.
@@ -54,13 +49,11 @@ def connect_to_dynamo():
         A boto3 Resource object pointing to dynamodb for the specified
         AWS account.
     """
-    try:
-        dynamodb = boto3.resource('dynamodb',
-                                 region_name=cfg.REGION,
-                                 aws_access_key_id=cfg.ACCESS_ID,
-                                 aws_secret_access_key=cfg.ACCESS_KEY)
-    except:
-        pass
+    dynamodb = boto3.resource(
+        'dynamodb',
+        region_name=cfg.REGION,
+        aws_access_key_id=cfg.ACCESS_ID,
+        aws_secret_access_key=cfg.ACCESS_KEY)
     return dynamodb
 
 def create_dynamo_table(dynamodb_resource, table_name):
@@ -71,7 +64,7 @@ def create_dynamo_table(dynamodb_resource, table_name):
     unique route in the dataset. Read/write capacity is limited to 20/sec to
     stay within the AWS free-tier. This is necessary but greatly slows down the
     upload process when using a large number of routes.
-    
+
     Args:
         dynamodb_resource: A boto3 Resource pointing to the AWS account on which
             the table should be created.
@@ -80,29 +73,17 @@ def create_dynamo_table(dynamodb_resource, table_name):
     Returns:
         A boto3 Table object pointing to the newly created segments table.
     """
-    table = dynamodb_resource.create_table(TableName=table_name,
-                                          KeySchema=[
-                                              {
-                                                  'AttributeName': 'route_id',
-                                                  'KeyType': 'HASH'
-                                              },
-                                              {
-                                                  'AttributeName': 'local_express_code',
-                                                  'KeyType': 'RANGE'
-                                              }],
-                                          AttributeDefinitions=[
-                                              {
-                                                  'AttributeName': 'route_id',
-                                                  'AttributeType': 'N'
-                                              },
-                                              {
-                                                  'AttributeName': 'local_express_code',
-                                                  'AttributeType': 'S'
-                                              }],
-                                          ProvisionedThroughput={
-                                              'ReadCapacityUnits': 20,
-                                              'WriteCapacityUnits': 20
-                                          })
+    table = dynamodb_resource.create_table(
+        TableName=table_name,
+        KeySchema=[
+            {'AttributeName': 'route_id', 'KeyType': 'HASH'},
+            {'AttributeName': 'local_express_code', 'KeyType': 'RANGE'}],
+        AttributeDefinitions=[
+            {'AttributeName': 'route_id', 'AttributeType': 'N'},
+            {'AttributeName': 'local_express_code', 'AttributeType': 'S'}],
+        ProvisionedThroughput={
+            'ReadCapacityUnits': 20,
+            'WriteCapacityUnits': 20})
     # Wait until the table exists.
     table.meta.client.get_waiter('table_exists').wait(TableName=table_name)
     return table
@@ -116,7 +97,7 @@ def upload_segments_to_dynamo(dynamodb_resource, table_name, kcm_routes):
     is created for past speeds and initialized empty. When summarize_rds.py is
     run, it will append the average daily speed to the historic speeds list and
     set the new average speed to that day's speed.
-    
+
     Args:
         dynamodb_resource: A boto3 Resource pointing to the AWS account on which
             the table should be created.
@@ -134,23 +115,23 @@ def upload_segments_to_dynamo(dynamodb_resource, table_name, kcm_routes):
     table = dynamodb_resource.Table(table_name)
     with table.batch_writer() as batch:
         for route in kcm_routes['features']:
-            batch.put_item(Item={
-                          'route_id': route['properties']['ROUTE_ID'],
-                          'local_express_code': route['properties']['LOCAL_EXPR'],
-                          'route_num': route['properties']['ROUTE_NUM'],
-                          'historic_speeds': [],
-                          'avg_speed_m_s': 0})
+            batch.put_item(
+                Item={
+                    'route_id': route['properties']['ROUTE_ID'],
+                    'local_express_code': route['properties']['LOCAL_EXPR'],
+                    'route_num': route['properties']['ROUTE_NUM'],
+                    'historic_speeds': [],
+                    'avg_speed_m_s': 0})
     return 1
 
-def main_function(geojson_name,
-                 dynamodb_table_name):
+def main_function(geojson_name, dynamodb_table_name):
     """Uploads route segments for a bus network.
 
     Runs one time to initialize a dynamodb with a set of bus route segments. In
     this case, the network is the King County Metro network. The route shapefile
     can be found at:
     https://www5.kingcounty.gov/sdc/Metadata.aspx?Layer=transitroute.
-    
+
     Args:
         geojson_name: Path to the geojson file that is to be uploaded. Must have
             [properties][ROUTE_ID] and [properties][LOCAL_EXPR] elements. Do not
@@ -161,9 +142,9 @@ def main_function(geojson_name,
         An integer of the number of features that were uploaded to the
         database.
     """
-    with open(f"{geojson_name}.geojson", 'r') as f:
-        kcm_routes = json.load(f)
-    
+    with open(f"{geojson_name}.geojson", 'r') as shapefile:
+        kcm_routes = json.load(shapefile)
+
     # Turn all float values (coordinates mostly) into strings in the geojson
     kcm_routes = replace_floats(kcm_routes)
 
@@ -173,14 +154,14 @@ def main_function(geojson_name,
     print("Creating new table...")
     create_dynamo_table(dynamodb_resource, dynamodb_table_name)
     print("Uploading segments to table...")
-    upload_segments_to_dynamo(dynamodb_resource,
-                             dynamodb_table_name,
-                             kcm_routes)
+    upload_segments_to_dynamo(
+        dynamodb_resource,
+        dynamodb_table_name,
+        kcm_routes)
 
     # Return the number of features that are in the kcm data
-    return len(kcm_routes['features'])    
+    return len(kcm_routes['features'])
 
 # Main program starts here
-num_features = main_function('../data/kcm_routes',
-                            'KCM_Bus_Routes')
-print(f"{num_features} features in data uploaded to dynamodb")
+NUM_FEATURES_UPLOADED = main_function('../data/kcm_routes', 'KCM_Bus_Routes')
+print(f"{NUM_FEATURES_UPLOADED} features in data uploaded to dynamodb")
