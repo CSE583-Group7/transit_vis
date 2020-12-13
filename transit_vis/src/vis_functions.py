@@ -137,7 +137,7 @@ def save_and_view_map(f_map, output_file):
     Returns:
         1 when done writing and printing the Folium map .html file.
     """
-    f_map.save(f"{output_file}.html")
+    f_map.save(f"{output_file}")
     current_directory = os.getcwd()
     print("Map saved, please copy this file path into any browser: "+\
           "file://"+
