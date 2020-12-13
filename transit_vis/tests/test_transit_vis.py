@@ -14,6 +14,8 @@ test_oneshot_save_map(self) -- one shot test for saving final map object
 
 test_edgecase_save_map(cls) -- edge case to catch invalid file type to save to
 
+test_smoke_write_speed(cls) -- smoke test for writing speeds to map segments
+
 """
 
 import unittest
@@ -103,6 +105,25 @@ class TestTransitVis(unittest.TestCase):
             vis_functions.save_and_view_map(f_map, output_file)
         except TypeError:
             pass
+        
+    @classmethod
+    def test_smoke_write_speed(cls):
+        """
+        Smoke test for the function 'write_speeds_to_map_segments'
+        """
+        
+        route_dict = {}
+        route_dict['avg_speed_m_s'] = 9.0
+        route_dict['historic_speeds'] = ['10.0', '9.0']
+        
+        SPEED_LOOKUP = {}        
+        SPEED_LOOKUP[(100132, 'L')] = {'avg_speed_m_s': float(route_dict['avg_speed_m_s']),\
+                                       'historic_speeds': route_dict['historic_speeds']}
+
+        
+        assert vis_functions.write_speeds_to_map_segments(SPEED_LOOKUP,\
+                                                          SEGMENT_FILE)\
+                                                        is not None        
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestTransitVis)

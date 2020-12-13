@@ -128,6 +128,7 @@ def main_function(
     # Query the dynamoDB for all speed data
     print("Getting speed data from dynamodb...")
     speed_lookup = table_to_lookup(table)
+
     print("Writing speed data to segments for visualization...")
     speeds = vis_functions.write_speeds_to_map_segments(speed_lookup, segment_file)
 
