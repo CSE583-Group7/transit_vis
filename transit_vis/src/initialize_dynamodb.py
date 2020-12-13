@@ -1,3 +1,5 @@
+# pylint: disable=E1101
+
 """Builds a network from individual bus routes and uploads them.
 
 This module is intended to be run as a setup prior to using the visualization
