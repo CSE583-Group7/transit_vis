@@ -142,5 +142,5 @@ def save_and_view_map(f_map, output_file):
     print("Map saved, please copy this file path into any browser: "+\
           "file://"+
           current_directory+'/'+\
-          f"{output_file}.html")
+          f"{output_file}")
     return 1

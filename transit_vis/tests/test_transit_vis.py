@@ -67,7 +67,7 @@ class TestTransitVis(unittest.TestCase):
         f_map = vis_functions.generate_folium_map(SEGMENT_FILE,\
                                                 CENSUS_FILE,\
                                                 LINEAR_CM)
-        output_file = 'output_map'
+        output_file = 'output_map.html'
         assert vis_functions.save_and_view_map(f_map, output_file) \
                                                 is not None    
                                                 
@@ -78,7 +78,7 @@ class TestTransitVis(unittest.TestCase):
         f_map = vis_functions.generate_folium_map(SEGMENT_FILE,\
                                                 CENSUS_FILE,\
                                                 LINEAR_CM)
-        output_file = 'output_map'
+        output_file = 'output_map.html'
         self.assertAlmostEqual(vis_functions.save_and_view_map(\
                                                f_map, output_file), 1)                                             
 ##############################################################################
