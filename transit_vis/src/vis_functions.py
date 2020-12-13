@@ -85,6 +85,11 @@ def write_speeds_to_map_segments(speed_lookup, segment_file):
         A list containing the average speed of each segment that was
         successfully paired to a route (and will be plotted on the map).
     """
+    if isinstance(speed_lookup, dict):
+        pass
+    else:
+        raise TypeError('Speed lookup must be a dictionary')
+
     # Read route geojson, add property for avg speed, keep track of all speeds
     speeds = np.ones(0)
     with open(f"{segment_file}.geojson", 'r') as shapefile:

@@ -41,10 +41,6 @@ speeds_truth = np.array([9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9.,\
 route_dict = {}
 route_dict['avg_speed_m_s'] = 9.0
 route_dict['historic_speeds'] = ['10.0', '9.0']
-
-SPEED_LOOKUP = {}        
-SPEED_LOOKUP[(100132, 'L')] = {'avg_speed_m_s': float(route_dict['avg_speed_m_s']),\
-                               'historic_speeds': route_dict['historic_speeds']}
   
 
 class TestTransitVis(unittest.TestCase):
@@ -126,6 +122,9 @@ class TestTransitVis(unittest.TestCase):
         """
         Smoke test for the function 'write_speeds_to_map_segments'
         """
+        SPEED_LOOKUP = {}        
+        SPEED_LOOKUP[(100132, 'L')] = {'avg_speed_m_s': float(route_dict['avg_speed_m_s']),\
+                                       'historic_speeds': route_dict['historic_speeds']}
 
         assert vis_functions.write_speeds_to_map_segments(SPEED_LOOKUP,\
                                                           SEGMENT_FILE)\
@@ -134,10 +133,26 @@ class TestTransitVis(unittest.TestCase):
         """
         One-shot test for the function 'write_speeds_to_map_segments'
         """
-        
+        SPEED_LOOKUP = {}        
+        SPEED_LOOKUP[(100132, 'L')] = {'avg_speed_m_s': float(route_dict['avg_speed_m_s']),\
+                                       'historic_speeds': route_dict['historic_speeds']}
+                
         speeds_test = vis_functions.write_speeds_to_map_segments(SPEED_LOOKUP,SEGMENT_FILE)            
                                                         
-        self.assertIsNone(np.testing.assert_array_equal(speeds_truth, speeds_test))                                                                                                             
+        self.assertIsNone(np.testing.assert_array_equal(speeds_truth, speeds_test))  
+
+    @classmethod
+    def test_edgecase_write_speed(cls):
+        """
+        Edge case test to catch that speed inputs are a dictionary for the 
+        function 'write_speeds_to_map_segments'
+        """
+        SPEED_LOOKUP = np.array([1.0])
+
+        try:
+            vis_functions.write_speeds_to_map_segments(SPEED_LOOKUP,SEGMENT_FILE)            
+        except TypeError:
+            pass                                                                                                           
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestTransitVis)
