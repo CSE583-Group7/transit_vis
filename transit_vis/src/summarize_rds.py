@@ -13,15 +13,13 @@ smaller than 24hrs.
 
 
 from datetime import datetime
-import json
-import requests
 from zipfile import ZipFile
+import requests
 
 import boto3
 import numpy as np
-import psycopg2
 import pandas as pd
-from sklearn.neighbors import BallTree
+import psycopg2
 
 import config as cfg
 
@@ -117,10 +115,10 @@ def get_last_xdays_results(conn, num_days, rds_limit):
 
     if rds_limit > 0:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
-            "BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
+            f"BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
     else:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
-            "BETWEEN {start_time} AND {end_time};"
+            f"BETWEEN {start_time} AND {end_time};"
     with conn.cursor() as curs:
         curs.execute(query_text)
         daily_results = convert_cursor_to_tabular(curs)
@@ -139,10 +137,10 @@ def update_gtfs_route_info():
         1 when the download and unzipping process is complete.
     """
     url = 'http://metro.kingcounty.gov/GTFS/google_transit.zip'
-    r = requests.get(url, allow_redirects=True)
-    open('../data/google_transit.zip', 'wb').write(r.content)
-    with ZipFile('../data/google_transit.zip', 'r') as zipObj:
-        zipObj.extractall('../data/google_transit')
+    req = requests.get(url, allow_redirects=True)
+    open('../data/google_transit.zip', 'wb').write(req.content)
+    with ZipFile('../data/google_transit.zip', 'r') as zip_obj:
+        zip_obj.extractall('../data/google_transit')
     return 1
 
 def preprocess_trip_data(daily_results):
@@ -166,8 +164,10 @@ def preprocess_trip_data(daily_results):
         additional column named 'avg_speed_m_s'.
     """
     # Remove duplicate trip locations
-    daily_results.drop_duplicates(subset=['tripid','locationtime'], inplace=True)
-    daily_results.sort_values(by=['tripid','locationtime'], inplace=True)
+    daily_results.drop_duplicates(
+        subset=['tripid', 'locationtime'], inplace=True)
+    daily_results.sort_values(
+        by=['tripid', 'locationtime'], inplace=True)
 
     # Offset tripdistance, locationtime, and tripids by 1
     daily_results['prev_tripdistance'] = 1
@@ -182,15 +182,18 @@ def preprocess_trip_data(daily_results):
     daily_results.dropna(inplace=True)
 
     # Calculate average speed between each location bus is tracked at
-    daily_results.loc[:,'dist_diff'] = daily_results['tripdistance'] - daily_results['prev_tripdistance']
-    daily_results.loc[:,'time_diff'] = daily_results['locationtime'] - daily_results['prev_locationtime']
-    daily_results.loc[:,'avg_speed_m_s'] = daily_results['dist_diff'] / daily_results['time_diff']
+    daily_results.loc[:, 'dist_diff'] = daily_results['tripdistance'] \
+        - daily_results['prev_tripdistance']
+    daily_results.loc[:, 'time_diff'] = daily_results['locationtime'] \
+        - daily_results['prev_locationtime']
+    daily_results.loc[:, 'avg_speed_m_s'] = daily_results['dist_diff'] \
+        / daily_results['time_diff']
 
     # Remove rows where speed is below 0 or above 30 and round
     daily_results = daily_results[daily_results['avg_speed_m_s'] >= 0]
     daily_results = daily_results[daily_results['avg_speed_m_s'] <= 30]
-    daily_results.loc[:,'avg_speed_m_s'] = round(daily_results.loc[:,'avg_speed_m_s'])
-
+    daily_results.loc[:, 'avg_speed_m_s'] = round(
+        daily_results.loc[:, 'avg_speed_m_s'])
     return daily_results
 
 def connect_to_dynamo_table(table_name):
@@ -206,14 +209,12 @@ def connect_to_dynamo_table(table_name):
     Returns:
         A boto3 Table object pointing to the dynamodb table specified.
     """
-    try:
-        dynamodb = boto3.resource('dynamodb',
-                                 region_name=cfg.REGION,
-                                 aws_access_key_id = cfg.ACCESS_ID,
-                                 aws_secret_access_key = cfg.ACCESS_KEY)
-        table = dynamodb.Table(table_name)
-    except:
-        pass
+    dynamodb = boto3.resource(
+        'dynamodb',
+        region_name=cfg.REGION,
+        aws_access_key_id=cfg.ACCESS_ID,
+        aws_secret_access_key=cfg.ACCESS_KEY)
+    table = dynamodb.Table(table_name)
     return table
 
 def upload_to_dynamo(dynamodb_table, to_upload):
@@ -226,10 +227,9 @@ def upload_to_dynamo(dynamodb_table, to_upload):
 
     Args:
         dynamodb_table: A boto3 Table pointing to a dynamodb table that has been
-            initialized to contain the same segments as to_upload. 
+            initialized to contain the same segments as to_upload.
         to_upload: A Pandas Dataframe to be uploaded to dynamodb containing
-            route/segment ids, and their average speeds as route_id, segment_id,
-            and avg_speed_m_s.
+            route ids, and their average speeds
 
     Returns:
         The length of the to_upload argument.
@@ -243,17 +243,17 @@ def upload_to_dynamo(dynamodb_table, to_upload):
 
     # Update each route/segment id in the dynamodb with its new value
     for track in to_upload:
-        response = dynamodb_table.update_item(
+        dynamodb_table.update_item(
             Key={
                 'route_id': track['route_id'],
-                'local_express_code': track['trip_short_name'][0]
-            },
-            UpdateExpression="SET avg_speed_m_s=:speed, historic_speeds=list_append(if_not_exists(historic_speeds, :empty_list), :vals)",
+                'local_express_code': track['trip_short_name'][0]},
+            UpdateExpression="SET avg_speed_m_s=:speed," \
+                "historic_speeds=list_append(" \
+                "if_not_exists(historic_speeds, :empty_list), :vals)",
             ExpressionAttributeValues={
                 ':speed': track['avg_speed_m_s'],
                 ':vals': [track['avg_speed_m_s']],
-                ':empty_list': []
-            })
+                ':empty_list': []})
     return len(to_upload)
 
 def main_function(dynamodb_table_name, num_days, rds_limit):
@@ -266,7 +266,7 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     guarantees that they will be the same ones that are stored on the dynamodb
     database, allowing for this script to upload them. The Folium map will then
     download the speeds and display them using the same geojson file once again.
-    
+
     Args:
         dynamodb_table_name: The name of the table containing the segments that
             speeds will be matched and uploaded to.
@@ -300,15 +300,17 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     gtfs_trips = gtfs_trips[['route_id', 'trip_id', 'trip_short_name']]
     gtfs_routes = pd.read_csv('../data/google_transit/routes.txt')
     gtfs_routes = gtfs_routes[['route_id', 'route_short_name']]
-    with open('../data/kcm_routes.geojson', 'r') as f:
-        kcm_routes = json.load(f)
 
     # Merge scraped data with the gtfs data and alter route ids to fit schema
     print("Merging RDS data with GTFS files...")
-    daily_results = daily_results.merge(gtfs_trips, left_on='tripid',
-                                       right_on='trip_id')
-    daily_results = daily_results.merge(gtfs_routes, left_on='route_id',
-                                        right_on='route_id')
+    daily_results = daily_results.merge(
+        gtfs_trips,
+        left_on='tripid',
+        right_on='trip_id')
+    daily_results = daily_results.merge(
+        gtfs_routes,
+        left_on='route_id',
+        right_on='route_id')
 
     # Upload to dynamoDB
     print("Uploading aggregated segment data to dynamoDB...")
@@ -317,7 +319,8 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     return success
 
 # Main program starts here
-num_segments_updated = main_function(dynamodb_table_name='KCM_Bus_Routes',
-                                    num_days=1,
-                                    rds_limit=0)
-print(f"Number of segments updated: {num_segments_updated}")
+NUM_SEGMENTS_UPDATED = main_function(
+    dynamodb_table_name='KCM_Bus_Routes',
+    num_days=1,
+    rds_limit=10000)
+print(f"Number of segments updated: {NUM_SEGMENTS_UPDATED}")
