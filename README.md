@@ -12,17 +12,19 @@ Transit delays are unavoidable, and transit agencies often plan for them through
 ### Transit Vis Setup
 Prior to installing this project, make sure to install [anaconda](https://anaconda.org/)
 
-Once anaconda is installed:
-1. From terminal clone the repository: git clone https://github.com/CSE583-Group7/transit_vis.git 
+#### Once anaconda is installed:
+1. From terminal clone the repository: git clone https://github.com/CSE583-Group7/transit_vis.git
 2. From terminal create the conda environment: conda env create -q -n transit_vis --file environment.yml
-3. From terminal activate the conda environment: conda activate transit_vis  
-**If setting up the backend for a new transit vis network:**  
-4. Create AWS-RDS database using create_gtfs_tables.sql; scrape GTFS-RT source data to this location
-5. Copy AWS credentials for the account holding the transit data in config.py
+3. From terminal activate the conda environment: conda activate transit_vis
+
+#### If setting up the backend for a new transit vis network:
+4. Create RDS database using create_gtfs_tables.sql. Scrape GTFS-RT source data to this location  
+5. Copy AWS credentials for the account holding the transit data to config.py
 6. From terminal run once: python3 initialize_dynamodb.py
-7. From terminal run daily: python3 summarize_rds.py  
-**If using an existing transit vis backend:**  
-4. Copy AWS credentials for the account holding the transit data in config.py
+7. From terminal run daily: python3 summarize_rds.py
+
+#### If using an existing transit vis backend:
+4. Copy AWS credentials for the account holding the transit data to config.py
 
 ### Transit Vis Operation
 Once setup has been completed, the map can be generated and viewed for analysis:
@@ -35,6 +37,7 @@ The project is within the "transit_vis" directory. The project is further organi
 * tests (scripts to test the functions are properly working)
 * data (geojson and csv files of transit and socioeconmic data)
 
+#### Included Files
 ```
 transit_vis/
   |- README.md
@@ -58,24 +61,23 @@ transit_vis/
      |- component_specification.md
      |- functional_specification.md 
 ```
-### Generated Files
-During tool operation, several files are created in the data/ folder:
+#### Generated Files
+Created in the data folder during tool operation:
 * **kcm_routes_w_speeds_tmp.geojson:** A shapefile with added properties containing the speed data from the most recent run of the tool
 * **seattle_census_tracts_2010_tmp.csv:** A data file containing the combined s0801 and s1902 census tables
 * **google_transit.zip/google_transit:** A zip file and extracted folder containing the most up to date GTFS (tripids, routeids, stopids, etc.) information from King County Metro
-After running the tool, one file is created in the src/ folder:
+
+Created in the src folder during tool operation:
 * **output_map.html:** The final result from the most recent run which can be viewed in any web browser.
 
-### Project Data
-GTFS-RT Transit Data:
+### Project Data Sources
+Transit Location/ID Data:
 * [King County Metro GTFS-RT Data](http://developer.onebusaway.org/modules/onebusaway-application-modules/current/api/where/index.html)
-
-GTFS Transit Data:
 * [King County Metro GTFS Data](http://metro.kingcounty.gov/gtfs/)
 
 Socioeconomic Data:
 * [American Community Survey (ACS)](https://www.census.gov/programs-surveys/acs/data.html)
 
-Shapefiles:
-* [King Country Metro All Routes](https://www5.kingcounty.gov/sdc/TOC.aspx?agency=transit)
+Shapefile Data:
+* [All King Country Metro Routes](https://www5.kingcounty.gov/sdc/TOC.aspx?agency=transit)
 * [TIGER Census Tracts](https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html)
