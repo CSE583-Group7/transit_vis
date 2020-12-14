@@ -182,7 +182,7 @@ def save_and_view_map(f_map, output_file):
     if output_file[-5:] == '.html':
         pass
     else:
-        raise TypeError('output file must be an html')
+        raise ValueError('output file must be an html')
 
     f_map.save(f"{output_file}")
     current_directory = os.getcwd()
