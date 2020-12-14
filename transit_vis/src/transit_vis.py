@@ -13,7 +13,6 @@ in a web browser automatically.
 import boto3
 import branca.colormap as cm
 import numpy as np
-import pickle
 
 import config as cfg
 import vis_functions
@@ -89,9 +88,6 @@ def table_to_lookup(table):
                 'avg_speed_m_s': float(item['avg_speed_m_s']),
                 'historic_speeds': item['historic_speeds']
             }
-    pickle.dump(route_lookup, open(
-        '../tests/data/database_io/table_to_lookup_output.p',
-        'wb'))
     return route_lookup
 
 def main_function(
