@@ -8,7 +8,27 @@ Transit delays are unavoidable, and transit agencies often plan for them through
 
 ![Screenshot of Sample Map with Speed and Socioeconomic Data](example_output.png?raw=true "Example")
 
+### Installation and Operation
+Prior to installing this project, make sure to install [anaconda](https://anaconda.org/)
+
+Once anaconda is installed:
+1. clone the repository: git clone https://github.com/CSE583-Group7/transit_vis.git 
+2. create the necessary conda environment: conda env create -q -n transit_vis --file environment.yml
+3. activate the conda environment: conda activate transit_vis
+4. obtain a copy of config.py
+5. run: python3 initialize_dynamodb.py
+6. run daily: python3 summarize_rds.py
+
+Once steps 1-6 have been completed, the map can be generated and viewed for analysis:
+1. run from the terminal: python3 generate_transit_vis_map.py
+2. copy and paste output_map.html (including local file path) into any browser to display output data
+
 ### Project Directory Organization
+The project is within the "transit_vis" directory. The project is further organized into three main directories:
+* src (main scripts to execute)
+* tests (scripts to test the functions are properly working)
+* data (geojson and csv files of transit and socioeconmic data)
+
 ```
 transit_vis/
   |- readme.md
@@ -29,13 +49,12 @@ transit_vis/
         |- seattle_census_tracts.geojson
   |- docs/
      |- component_specification.md
-     |- functional_specification.md
+     |- functional_specification.md 
 ```
 
-### Installation and Operation
-* clone repo
-* obtain a copy of config.py
-* Run: python3 initialize_dynamodb.py
-* Run Daily: python3 summarize_rds.py
-* Run: python3 generate_transit_vis_map.py
-* open output_map.html (including local file path) into any browser to display output data
+### Project Data
+* Transit Data
+- King County Metro Data
+
+* Socioeconomic Data
+- American Community Survey (ACS)
