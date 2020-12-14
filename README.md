@@ -53,8 +53,8 @@ transit_vis/
 ```
 
 ### Project Data
-* Transit Data
-- King County Metro Data
+Transit data:
+* King County Metro Data
 
-* Socioeconomic Data
-- American Community Survey (ACS)
+Socioeconomic data:
+* American Community Survey (ACS)
