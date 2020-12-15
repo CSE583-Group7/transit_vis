@@ -114,6 +114,7 @@ def get_last_xdays_results(conn, num_days, rds_limit):
     while i < num_days:
         end_time = start_time
         start_time = end_time - (24*60*60)
+        i+=1
 
     if rds_limit > 0:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
