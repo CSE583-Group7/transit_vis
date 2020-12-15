@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # pylint: disable=E1101
-
+# pylint: disable=E0611
+# pylint: disable=E0401
 """Gathers the last 24hrs of speed data, aggregates it, and uploads it.
 
 This module takes speeds from a SQL data-warehouse and summarizes them to then
@@ -23,7 +26,7 @@ import numpy as np
 import pandas as pd
 import psycopg2
 
-import config as cfg
+from transit_vis.src import config as cfg
 
 
 def convert_cursor_to_tabular(query_result_cursor):
@@ -321,9 +324,9 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     success = upload_to_dynamo(table, daily_results)
     return success
 
-# Main program starts here
-NUM_SEGMENTS_UPDATED = main_function(
-    dynamodb_table_name='KCM_Bus_Routes',
-    num_days=1,
-    rds_limit=10000)
-print(f"Number of segments updated: {NUM_SEGMENTS_UPDATED}")
+if __name__ == "__main__":
+    NUM_SEGMENTS_UPDATED = main_function(
+        dynamodb_table_name='KCM_Bus_Routes',
+        num_days=1,
+        rds_limit=10000)
+    print(f"Number of segments updated: {NUM_SEGMENTS_UPDATED}")

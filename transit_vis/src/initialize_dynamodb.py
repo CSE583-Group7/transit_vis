@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # pylint: disable=E1101
-
+# pylint: disable=E0611
+# pylint: disable=E0401
 """Builds a network from individual bus routes and uploads them.
 
 This module is intended to be run as a setup prior to using the visualization
@@ -13,7 +16,7 @@ import json
 
 import boto3
 
-import config as cfg
+from transit_vis.src import config as cfg
 
 
 def replace_floats(obj):
@@ -164,6 +167,7 @@ def main_function(geojson_name, dynamodb_table_name):
     # Return the number of features that are in the kcm data
     return len(kcm_routes['features'])
 
-# Main program starts here
-NUM_FEATURES_UPLOADED = main_function('../data/kcm_routes', 'KCM_Bus_Routes')
-print(f"{NUM_FEATURES_UPLOADED} features in data uploaded to dynamodb")
+if __name__ == "__main__":
+    # Main program starts here
+    NUM_FEATURES_UPLOADED = main_function('../data/kcm_routes', 'KCM_Bus_Routes')
+    print(f"{NUM_FEATURES_UPLOADED} features in data uploaded to dynamodb")

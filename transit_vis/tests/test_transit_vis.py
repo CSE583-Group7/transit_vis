@@ -27,9 +27,8 @@ import unittest
 
 import branca.colormap as cm
 import numpy as np
-import pickle
 
-from transit_vis.src import vis_functions
+from transit_vis.src import transit_vis as vis_functions
 
 
 S0801_PATH = './transit_vis/tests/data/s0801'
