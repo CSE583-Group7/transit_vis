@@ -9,9 +9,11 @@ integration.
 
 
 import os
-
 import json
+
 import folium
+from folium.plugins import FloatImage
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -107,6 +109,16 @@ def write_speeds_to_map_segments(speed_lookup, segment_path):
         else:
             feature['properties']['AVG_SPEED_M_S'] = 0.0
             feature['properties']['HISTORIC_SPEEDS'] = [0.0]
+    # Plot and save the distribution of speeds to be plotted with Folium
+    plt.figure(figsize=(4, 2.5))
+    plt.style.use('seaborn')
+    plt.hist(speeds[np.nonzero(speeds)], bins=15)
+    plt.xlim((0, 30))
+    plt.title('Network Speeds')
+    plt.xlabel('Average Speed (m/s)')
+    plt.ylabel('Count of Routes')
+    plt.savefig(f"{segment_path}_histogram.png")
+    # Write the downloaded speeds to temp file to be plotted with Folium
     with open(f"{segment_path}_w_speeds_tmp.geojson", 'w+') as new_shapefile:
         json.dump(kcm_routes, new_shapefile)
     return speeds
@@ -164,7 +176,12 @@ def generate_folium_map(segment_file, census_file, colormap):
         fill_color='PuBu',
         fill_opacity=0.7,
         line_opacity=0.4,
-        legend_name='mean income')
+        legend_name='Mean Income (usd)')
+    # Read in histogram images for citywide speeds and arrange them on map
+    histogram_figs = FloatImage(
+        f"{segment_file}_histogram.png",
+        bottom=0,
+        left=0)
     # Draw map using the speeds and census data
     f_map = folium.Map(
         location=[47.606209, -122.332069],
@@ -172,6 +189,7 @@ def generate_folium_map(segment_file, census_file, colormap):
         prefer_canvas=True)
     seattle_tracts.add_to(f_map)
     kcm_routes.add_to(f_map)
+    histogram_figs.add_to(f_map)
     colormap.caption = 'Average Speed (m/s)'
     colormap.add_to(f_map)
     folium.LayerControl().add_to(f_map)
@@ -186,7 +204,7 @@ def save_and_view_map(f_map, output_path):
 
     Args:
         f_map: A Folium Map object to be written.
-        output_file: A string path to the location where the Folium Map should
+        output_path: A string path to the location where the Folium Map should
             be saved. Include file type ending (.html).
 
     Returns:
@@ -196,7 +214,6 @@ def save_and_view_map(f_map, output_path):
         pass
     else:
         raise ValueError('output file must be an html')
-
     f_map.save(f"{output_path}")
     current_directory = os.getcwd()
     print("Map saved, please copy this file path into any browser: "+\
