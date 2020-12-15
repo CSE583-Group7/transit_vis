@@ -159,7 +159,7 @@ def generate_folium_map(segment_file, census_file, colormap):
             fields=['ROUTE_NUM', 'AVG_SPEED_M_S',
                     'ROUTE_ID', 'LOCAL_EXPR', 'HISTORIC_SPEEDS'],
             aliases=['Route Number', 'Most Recent Speed (m/s)',
-                     'Route ID', 'Local or Express', 'Previous Speeds']))
+                     'Route ID', 'Local (L) or Express (E)', 'Previous Speeds']))
     # Read in the census data/shapefile and create a choropleth based on income
     seattle_tracts_df = pd.read_csv(f"{census_file}_tmp.csv")
     seattle_tracts_df['GEO_ID'] = seattle_tracts_df['GEO_ID'].astype(str)
