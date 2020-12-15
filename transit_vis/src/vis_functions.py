@@ -117,7 +117,7 @@ def write_speeds_to_map_segments(speed_lookup, segment_path):
     plt.title('Network Speeds')
     plt.xlabel('Average Speed (m/s)')
     plt.ylabel('Count of Routes')
-    plt.savefig(f"{segment_path}_histogram.png")
+    plt.savefig(f"{segment_path}_histogram.png", bbox_inches='tight')
     # Write the downloaded speeds to temp file to be plotted with Folium
     with open(f"{segment_path}_w_speeds_tmp.geojson", 'w+') as new_shapefile:
         json.dump(kcm_routes, new_shapefile)
