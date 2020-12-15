@@ -107,8 +107,8 @@ def write_speeds_to_map_segments(speed_lookup, segment_path):
                 speed_lookup[(route_id, local_express_code)]['historic_speeds']
             speeds = np.append(speeds, speed)
         else:
-            feature['properties']['AVG_SPEED_M_S'] = 0.0
-            feature['properties']['HISTORIC_SPEEDS'] = [0.0]
+            feature['properties']['AVG_SPEED_M_S'] = 0
+            feature['properties']['HISTORIC_SPEEDS'] = [0]
     # Plot and save the distribution of speeds to be plotted with Folium
     plt.figure(figsize=(4, 2.5))
     plt.style.use('seaborn')

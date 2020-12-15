@@ -84,9 +84,10 @@ def table_to_lookup(table):
         if 'avg_speed_m_s' in item.keys():
             route_id = int(item['route_id'])
             local_express_code = item['local_express_code']
+            hist_speeds = [float(i) for i in item['historic_speeds']]
             route_lookup[(route_id, local_express_code)] = {
                 'avg_speed_m_s': float(item['avg_speed_m_s']),
-                'historic_speeds': item['historic_speeds']
+                'historic_speeds': hist_speeds
             }
     return route_lookup
 

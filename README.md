@@ -37,6 +37,8 @@ The project is within the "transit_vis" directory. The project is further organi
 * tests (scripts to test the functions are properly working)
 * data (geojson and csv files of transit and socioeconmic data)
 
+Copies of all files in the "data" directory including files generated during operation are kept in the tests directory for the purpose of keeping test results separate from actual results when running the unit tests.
+
 #### Included Files
 ```
 transit_vis/
@@ -52,6 +54,9 @@ transit_vis/
         |- create_gtfs_tables.sql
      |- tests/
         |- test_transit_vis.py
+        |- data/
+           |- kcm_routes.geojson
+           |- ...
      |- data/
         |- kcm_routes.geojson
         |- s0801.csv
@@ -66,6 +71,7 @@ Created in the data folder during tool operation:
 * **kcm_routes_w_speeds_tmp.geojson:** A shapefile with added properties containing the speed data from the most recent run of the tool
 * **seattle_census_tracts_2010_tmp.csv:** A data file containing the combined s0801 and s1902 census tables
 * **google_transit.zip/google_transit:** A zip file and extracted folder containing the most up to date GTFS (tripids, routeids, stopids, etc.) information from King County Metro
+* **kcm_routes_histogram.png:** An image file that shows the distribution of transit speeds for the entire network from the most recent run.
 
 Created in the src folder during tool operation:
 * **output_map.html:** The final result from the most recent run which can be viewed in any web browser.
