@@ -20,15 +20,15 @@ Prior to installing this project, make sure to install [anaconda](https://anacon
 #### If setting up the backend for a new transit vis network:
 4. Create RDS database using create_gtfs_tables.sql. Scrape GTFS-RT source data to this location  
 5. Copy AWS credentials for the account holding the transit data to config.py
-6. From terminal run once: python3 initialize_dynamodb.py
-7. From terminal run daily: python3 summarize_rds.py
+6. From terminal run once: python -m transit_vis.src.initialize_dynamodb
+7. From terminal run daily: python -m transit_vis.src.summarize_rds
 
 #### If using an existing transit vis backend:
 4. Copy AWS credentials for the account holding the transit data to config.py
 
 ### Transit Vis Operation
 Once setup has been completed, the map can be generated and viewed for analysis:
-1. From terminal run: python3 generate_transit_vis_map.py
+1. From terminal run: python -m transit_vis.src.transit_vis
 2. Copy and paste output_map.html (including local file path) into any browser to display output data, or open the output_map.html file located in the /src directory 
 
 ### Project Directory Organization
@@ -46,11 +46,9 @@ transit_vis/
   |- LICENSE.md
   |- transit_vis/  
      |- src/
-        |- generate_transit_vis_map.py
         |- initialize_dynamodb.py
         |- summarize_rds.py
         |- transit_vis.py
-        |- vis_functions.py
         |- create_gtfs_tables.sql
      |- tests/
         |- test_transit_vis.py
@@ -73,7 +71,7 @@ Created in the data folder during tool operation:
 * **google_transit.zip/google_transit:** A zip file and extracted folder containing the most up to date GTFS (tripids, routeids, stopids, etc.) information from King County Metro
 * **kcm_routes_histogram.png:** An image file that shows the distribution of transit speeds for the entire network from the most recent run.
 
-Created in the src folder during tool operation:
+Created in the top-level folder during tool operation:
 * **output_map.html:** The final result from the most recent run which can be viewed in any web browser.
 
 ### Project Data Sources
