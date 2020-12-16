@@ -128,7 +128,7 @@ def get_last_xdays_results(conn, num_days, rds_limit):
     if rds_limit >= 0:
         pass
     else:
-        raise TypeError('rds_limit must be 0 or greater')
+        raise ValueError('rds_limit must be 0 or greater')
 
     if rds_limit > 0:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
