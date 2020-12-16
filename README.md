@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/CSE583-Group7/transit_vis.svg?branch=main)](https://travis-ci.org/CSE583-Group7/transit_vis)
-[![Coverage Status](https://coveralls.io/repos/github/CSE583-Group7/transit_vis/badge.svg?branch=main&service=github)](https://coveralls.io/github/CSE583-Group7/transit_vis?branch=main&service=github)
+[![Coverage Status](https://coveralls.io/repos/github/CSE583-Group7/transit_vis/badge.svg?branch=main)](https://coveralls.io/github/CSE583-Group7/transit_vis?branch=main)
 ## Where's My Bus?
 Team: Zack Aemmer, Kelly Balmes, Alex Goldstein, Steven Wilson | CSE 583 Software Development for Data Scientists
 
@@ -35,7 +35,7 @@ Once setup has been completed, the map can be generated and viewed for analysis:
 The project is within the "transit_vis" directory. The project is further organized into three main directories:
 * src (main scripts to execute)
 * tests (scripts to test the functions are properly working)
-* data (geojson and csv files of transit and socioeconmic data)
+* data (geojson and csv files of transit and socioeconomic data)
 
 Copies of all files in the "data" directory including files generated during operation are kept in the tests directory for the purpose of keeping test results separate from actual results when running the unit tests.
 
