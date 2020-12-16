@@ -27,6 +27,10 @@ DATA_PATH = './transit_vis/data'
 nested_list = [1.1, 2.2, 3.3, [4.4, 5.5, 6.1]]
 daily_results = pd.read_csv("transit_vis/tests/data/daily_results_test.csv")
 
+conn = None
+num_days = 7
+rds_limit = 1
+
 class TestBackendHelpers(unittest.TestCase):
     """
     Unittest for helper functions in 'initialize_dynamodb' and 'summarize_rds'
@@ -83,11 +87,9 @@ class TestBackendHelpers(unittest.TestCase):
         Edge case test to catch pandas dataframe is not inputted to
         'upload_to_dynamo'
         """
-        conn = None
-        num_days = 7
-        rds_limit = '1'
+        bad_rds_limit = '1'
         try:
-             summarize_rds.get_last_xdays_results(conn, num_days, rds_limit)
+             summarize_rds.get_last_xdays_results(conn, num_days, bad_rds_limit)
         except TypeError:
             pass
 
@@ -97,14 +99,23 @@ class TestBackendHelpers(unittest.TestCase):
         Edge case test to catch pandas dataframe is not inputted to
         'upload_to_dynamo'
         """
-        conn = None
-        num_days = 7
-        rds_limit = -1
+        bad_rds_limit = -1
 
+        try:
+             summarize_rds.get_last_xdays_results(conn, num_days, bad_rds_limit)
+        except TypeError:
+            pass
+        
+    @classmethod
+    def test_edgecase_get_results_no_connection(cls):
+        """
+        Edge case test to catch pandas dataframe is not inputted to
+        'upload_to_dynamo'
+        """
         try:
              summarize_rds.get_last_xdays_results(conn, num_days, rds_limit)
         except TypeError:
-            pass
+            pass        
 
     @classmethod
     def test_smoke_preprocess(cls):

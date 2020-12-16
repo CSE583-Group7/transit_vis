@@ -136,6 +136,12 @@ def get_last_xdays_results(conn, num_days, rds_limit):
     else:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
             f"BETWEEN {start_time} AND {end_time};"
+
+    if conn is not None:
+        pass
+    else:
+        raise TypeError('no Psycopg connection found')
+
     with conn.cursor() as curs:
         curs.execute(query_text)
         daily_results = convert_cursor_to_tabular(curs)
