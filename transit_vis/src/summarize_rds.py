@@ -81,7 +81,7 @@ def connect_to_rds():
         A Psycopg Connection object for the RDS data warehouse specified in
         config.py.
     """
-    
+
     conn = psycopg2.connect(
         host=cfg.HOST,
         database=cfg.DATABASE,
@@ -246,7 +246,7 @@ def upload_to_dynamo(dynamodb_table, to_upload):
         pass
     else:
         raise TypeError('to_upload must be a pandas dataframe')
-    
+
     # Aggregate the observed bus speeds by their route/segment ids
     to_upload = to_upload[['route_id', 'trip_short_name', 'avg_speed_m_s']]
     to_upload = to_upload.groupby(['route_id', 'trip_short_name']).mean().reset_index()
