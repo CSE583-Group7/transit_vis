@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/CSE583-Group7/transit_vis.svg?branch=main)](https://travis-ci.org/CSE583-Group7/transit_vis)
-[![Coverage Status](https://coveralls.io/repos/github/CSE583-Group7/transit_vis/badge.svg?branch=main)](https://coveralls.io/github/CSE583-Group7/transit_vis?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/CSE583-Group7/transit_vis/badge.svg?branch=main&service=github)](https://coveralls.io/github/CSE583-Group7/transit_vis?branch=main)
 ## Where's My Bus?
 Team: Zack Aemmer, Kelly Balmes, Alex Goldstein, Steven Wilson | CSE 583 Software Development for Data Scientists
 
@@ -31,6 +31,11 @@ Once setup has been completed, the map can be generated and viewed for analysis:
 1. From terminal run: python -m transit_vis.src.transit_vis
 2. Copy and paste output_map.html (including local file path) into any browser to display output data, or open the output_map.html file located in the top level directory 
 
+Additionally, community members can utilize a jupyter notebook to visualize the transit data.
+1. Open "widget_generate_transit_vis_map.ipynb" in a jupyter notebook 
+2. Enter into the display box destination coordinates, potential home coordinates, minimum salary, and maximum salary.
+3. Copy and paste output_map_widgets.html (including local file path) into any browser to display output data, or open the output_map_widgets.html file located in the top level directory 
+
 ### Project Directory Organization
 The project is within the "transit_vis" directory. The project is further organized into three main directories:
 * src (main scripts to execute)
@@ -44,6 +49,7 @@ Copies of all files in the "data" directory including files generated during ope
 transit_vis/
   |- README.md
   |- LICENSE.md
+  |- widget_generate_transit_vis_map.ipynb
   |- transit_vis/  
      |- src/
         |- initialize_dynamodb.py
@@ -74,6 +80,7 @@ Created in the data folder during tool operation:
 
 Created in the top-level folder during tool operation:
 * **output_map.html:** The final result from the most recent run which can be viewed in any web browser.
+* **output_map_widgets.html:** The final result from the most recent run of the jupyter notebook which can be viewed in any web browser.
 
 ### Project Data Sources
 Transit Location/ID Data:
