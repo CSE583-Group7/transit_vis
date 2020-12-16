@@ -25,6 +25,7 @@ from transit_vis.src import summarize_rds
 #replace floats and update gtfs
 DATA_PATH = './transit_vis/data'
 nested_list = [1.1, 2.2, 3.3, [4.4, 5.5, 6.1]]
+nested_dictionary = {'var1': 0.5, 'var2': 5.2}
 daily_results = pd.read_csv("transit_vis/tests/data/daily_results_test.csv")
 
 conn = None
@@ -41,6 +42,13 @@ class TestBackendHelpers(unittest.TestCase):
         Smoke test for the function 'replace_floats'
         """
         assert initialize_dynamodb.replace_floats(nested_list) is not None
+        
+    @classmethod
+    def test_smoke_floats_dict(cls):
+        """
+        Smoke test for the function 'replace_floats'
+        """
+        assert initialize_dynamodb.replace_floats(nested_dictionary) is not None        
 
     def test_oneshot_floats(self):
         """
