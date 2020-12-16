@@ -29,7 +29,7 @@ Prior to installing this project, make sure to install [anaconda](https://anacon
 ### Transit Vis Operation
 Once setup has been completed, the map can be generated and viewed for analysis:
 1. From terminal run: python -m transit_vis.src.transit_vis
-2. Copy and paste output_map.html (including local file path) into any browser to display output data, or open the output_map.html file located in the /src directory 
+2. Copy and paste output_map.html (including local file path) into any browser to display output data, or open the output_map.html file located in the top level directory 
 
 ### Project Directory Organization
 The project is within the "transit_vis" directory. The project is further organized into three main directories:
@@ -52,6 +52,7 @@ transit_vis/
         |- create_gtfs_tables.sql
      |- tests/
         |- test_transit_vis.py
+        |- test_backend_helpers.py
         |- data/
            |- kcm_routes.geojson
            |- ...

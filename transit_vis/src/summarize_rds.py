@@ -303,9 +303,9 @@ def main_function_summ(dynamodb_table_name, num_days, rds_limit):
 
     # Load the gtfs trip-route info and segment shapefile
     print("Loading shapefile and GTFS files...")
-    gtfs_trips = pd.read_csv('.transit_vis/data/google_transit/trips.txt')
+    gtfs_trips = pd.read_csv('./transit_vis/data/google_transit/trips.txt')
     gtfs_trips = gtfs_trips[['route_id', 'trip_id', 'trip_short_name']]
-    gtfs_routes = pd.read_csv('.transit_vis/data/google_transit/routes.txt')
+    gtfs_routes = pd.read_csv('./transit_vis/data/google_transit/routes.txt')
     gtfs_routes = gtfs_routes[['route_id', 'route_short_name']]
 
     # Merge scraped data with the gtfs data and alter route ids to fit schema
