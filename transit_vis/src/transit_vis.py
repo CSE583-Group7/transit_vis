@@ -326,8 +326,6 @@ def main_function(
         census_path: A string path to the geojson TIGER shapefile as
             downloaded from the ACS, containing polygon data for census tracts
             in the state of Washington.
-        routes: A list of route numbers with length 0-3 that whose historic
-            speeds should be plotted.
 
     Returns:
         1 when done writing and opening the Folium map .html file.
