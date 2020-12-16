@@ -14,6 +14,7 @@ test_oneshot_gtfs(self) -- oneshot test for updating the gtfs data source
 
 import os
 import unittest
+import numpy as np
 
 from transit_vis.src import initialize_dynamodb
 from transit_vis.src import summarize_rds
@@ -58,7 +59,20 @@ class TestBackendHelpers(unittest.TestCase):
             os.remove(f"{DATA_PATH}/google_transit.zip")
         summarize_rds.update_gtfs_route_info()
         self.assertTrue(os.path.exists(f"{DATA_PATH}/google_transit.zip"))
-
+         
+    @classmethod
+    def test_edgecase_upload(cls):
+        """
+        Edge case test to catch pandas dataframe is not inputted to
+        'upload_to_dynamo'
+        """
+        to_upload = np.array([1,1])
+        dynamodb_table = np.array([1,1])
+        
+        try:
+             summarize_rds.upload_to_dynamo(dynamodb_table, to_upload)
+        except TypeError:
+            pass
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestBackendHelpers)
