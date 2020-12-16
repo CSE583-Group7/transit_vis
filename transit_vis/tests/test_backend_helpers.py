@@ -88,6 +88,21 @@ class TestBackendHelpers(unittest.TestCase):
              summarize_rds.get_last_xdays_results(conn, num_days, rds_limit)
         except TypeError:
             pass        
+        
+    @classmethod
+    def test_edgecase_get_results_negative(cls):
+        """
+        Edge case test to catch pandas dataframe is not inputted to
+        'upload_to_dynamo'
+        """
+        conn = None
+        num_days = 7
+        rds_limit = -1
+        
+        try:
+             summarize_rds.get_last_xdays_results(conn, num_days, rds_limit)
+        except TypeError:
+            pass          
 ##############################################################################
 
 SUITE = unittest.TestLoader().loadTestsFromTestCase(TestBackendHelpers)
