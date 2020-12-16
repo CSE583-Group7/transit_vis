@@ -118,7 +118,7 @@ class TestBackendHelpers(unittest.TestCase):
         Oneshot test for the function 'preprocess_trip_data'
         """
         x = summarize_rds.preprocess_trip_data(daily_results)
-        self.assertTrue(pd.notnull(x))
+        self.assertTrue(pd.notnull(x).any)
 
 ##############################################################################
 
