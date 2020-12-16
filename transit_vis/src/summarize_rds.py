@@ -144,9 +144,10 @@ def update_gtfs_route_info():
     """
     url = 'http://metro.kingcounty.gov/GTFS/google_transit.zip'
     req = requests.get(url, allow_redirects=True)
-    open('../data/google_transit.zip', 'wb').write(req.content)
-    with ZipFile('../data/google_transit.zip', 'r') as zip_obj:
-        zip_obj.extractall('../data/google_transit')
+    with open('./transit_vis/data/google_transit.zip', 'wb') as g_file:
+        g_file.write(req.content)
+    with ZipFile('./transit_vis/data/google_transit.zip', 'r') as zip_obj:
+        zip_obj.extractall('./transit_vis/data/google_transit')
     return 1
 
 def preprocess_trip_data(daily_results):
@@ -262,7 +263,7 @@ def upload_to_dynamo(dynamodb_table, to_upload):
                 ':empty_list': []})
     return len(to_upload)
 
-def main_function(dynamodb_table_name, num_days, rds_limit):
+def main_function_summ(dynamodb_table_name, num_days, rds_limit):
     """Queries 24hrs of data from RDS, calculates speeds, and uploads them.
 
     Runs daily to take 24hrs worth of data stored in the data warehouse
@@ -302,9 +303,9 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
 
     # Load the gtfs trip-route info and segment shapefile
     print("Loading shapefile and GTFS files...")
-    gtfs_trips = pd.read_csv('../data/google_transit/trips.txt')
+    gtfs_trips = pd.read_csv('.transit_vis/data/google_transit/trips.txt')
     gtfs_trips = gtfs_trips[['route_id', 'trip_id', 'trip_short_name']]
-    gtfs_routes = pd.read_csv('../data/google_transit/routes.txt')
+    gtfs_routes = pd.read_csv('.transit_vis/data/google_transit/routes.txt')
     gtfs_routes = gtfs_routes[['route_id', 'route_short_name']]
 
     # Merge scraped data with the gtfs data and alter route ids to fit schema
@@ -325,7 +326,7 @@ def main_function(dynamodb_table_name, num_days, rds_limit):
     return success
 
 if __name__ == "__main__":
-    NUM_SEGMENTS_UPDATED = main_function(
+    NUM_SEGMENTS_UPDATED = main_function_summ(
         dynamodb_table_name='KCM_Bus_Routes',
         num_days=1,
         rds_limit=10000)

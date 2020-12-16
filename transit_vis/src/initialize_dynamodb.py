@@ -129,7 +129,7 @@ def upload_segments_to_dynamo(dynamodb_resource, table_name, kcm_routes):
                     'avg_speed_m_s': 0})
     return 1
 
-def main_function(geojson_name, dynamodb_table_name):
+def main_function_init(geojson_name, dynamodb_table_name):
     """Uploads route segments for a bus network.
 
     Runs one time to initialize a dynamodb with a set of bus route segments. In
@@ -169,5 +169,7 @@ def main_function(geojson_name, dynamodb_table_name):
 
 if __name__ == "__main__":
     # Main program starts here
-    NUM_FEATURES_UPLOADED = main_function('../data/kcm_routes', 'KCM_Bus_Routes')
+    NUM_FEATURES_UPLOADED = main_function_init(
+        './transit_vis/data/kcm_routes',
+        'KCM_Bus_Routes')
     print(f"{NUM_FEATURES_UPLOADED} features in data uploaded to dynamodb")
