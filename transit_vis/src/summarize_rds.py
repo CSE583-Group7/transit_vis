@@ -120,12 +120,28 @@ def get_last_xdays_results(conn, num_days, rds_limit):
         start_time = end_time - (24*60*60)
         i += 1
 
+    if isinstance(rds_limit, int):
+        pass
+    else:
+        raise TypeError('rds_limit must be an integer')
+
+    if rds_limit >= 0:
+        pass
+    else:
+        raise ValueError('rds_limit must be 0 or greater')
+
     if rds_limit > 0:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
             f"BETWEEN {start_time} AND {end_time} LIMIT {rds_limit};"
     else:
         query_text = f"SELECT * FROM active_trips_study WHERE collectedtime " \
             f"BETWEEN {start_time} AND {end_time};"
+
+    if conn is not None:
+        pass
+    else:
+        raise TypeError('no Psycopg connection found')
+
     with conn.cursor() as curs:
         curs.execute(query_text)
         daily_results = convert_cursor_to_tabular(curs)

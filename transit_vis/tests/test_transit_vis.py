@@ -10,7 +10,7 @@ test_smoke_folium_map(cls) -- smoke test for generating folium map
 
 test_smoke_write_speed(cls) -- smoke test for writing speeds to map
 
-test_oneshot_write_speed(self) -- one shot test for writing speeds to map 
+test_oneshot_write_speed(self) -- one shot test for writing speeds to map
 
 test_edgecase_write_speed(cls) -- edge case to catch invalid input type
 
@@ -37,9 +37,9 @@ SEGMENT_PATH = './transit_vis/tests/data/kcm_routes'
 CENSUS_PATH = './transit_vis/tests/data/seattle_census_tracts_2010'
 OUTPUT_PATH = './transit_vis/tests/output_map.html'
 LINEAR_CM = cm.LinearColormap(['red', 'green'], vmin=0.5, vmax=100.)
-route_dict = {}
-route_dict[(100001, 'L')] = {'avg_speed_m_s': 7.5, 'historic_speeds': [2.2, 7.5]}
-route_dict[(999999, 'L')] = {'avg_speed_m_s': 5.9, 'historic_speeds': [0.5, 5.9]}
+ROUTE_DICT = {}
+ROUTE_DICT[(100001, 'L')] = {'avg_speed_m_s': 7.5, 'historic_speeds': [2.2, 7.5]}
+ROUTE_DICT[(999999, 'L')] = {'avg_speed_m_s': 5.9, 'historic_speeds': [0.5, 5.9]}
 
 
 class TestTransitVis(unittest.TestCase):
@@ -83,7 +83,7 @@ class TestTransitVis(unittest.TestCase):
         """
         Smoke test for the function 'write_speeds_to_map_segments'
         """
-        speed_lookup = route_dict
+        speed_lookup = ROUTE_DICT
         assert vis_functions.write_speeds_to_map_segments(
             speed_lookup,
             SEGMENT_PATH) is not None
@@ -92,7 +92,7 @@ class TestTransitVis(unittest.TestCase):
         """
         One-shot test for the function 'write_speeds_to_map_segments'
         """
-        speed_lookup = route_dict
+        speed_lookup = ROUTE_DICT
         speeds_test = vis_functions.write_speeds_to_map_segments(
             speed_lookup,
             SEGMENT_PATH)
@@ -142,9 +142,9 @@ class TestTransitVis(unittest.TestCase):
             SEGMENT_PATH,
             CENSUS_PATH,
             LINEAR_CM)
-        BAD_OUTPUT_PATH = 'transit_vis/tests/output_map.csv'
+        bad_output_path = 'transit_vis/tests/output_map.csv'
         with self.assertRaises(ValueError):
-            vis_functions.save_and_view_map(f_map, BAD_OUTPUT_PATH)
+            vis_functions.save_and_view_map(f_map, bad_output_path)
 
 ##############################################################################
 
