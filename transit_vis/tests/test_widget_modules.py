@@ -1,24 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-""" Class to test the repository 'transit_vis'
+""" Class to test the widget modules
 
-test_smoke_census(cls) -- smoke test for writing census data to geoJSON
+test_smoke_folium_map_widget(cls) -- smoke test for widget folium map
 
-test_oneshot_census(self) -- one-shot test for writing census data to geoJSON
-
-test_smoke_folium_map(cls) -- smoke test for generating folium map
-
-test_smoke_write_speed(cls) -- smoke test for writing speeds to map
-
-test_oneshot_write_speed(self) -- one shot test for writing speeds to map
-
-test_edgecase_write_speed(cls) -- edge case to catch invalid input type
-
-test_smoke_save_map(cls) -- smoke test for saving final map object
-
-test_oneshot_save_map(self) -- one shot test for saving final map object
-
-test_edgecase_save_map(cls) -- edge case to catch invalid file type to save to
 """
 
 
@@ -42,12 +27,12 @@ MAX_INCOME_VALUE = 60000
 
 class TestWidgetModules(unittest.TestCase):
     """
-    Unittest for the module 'vis_functions'
+    Unittest for the module 'widget_modules'
     """
     @classmethod
-    def test_smoke_folium_map(cls):
+    def test_smoke_folium_map_widget(cls):
         """
-        Smoke test for the function 'generate_folium_map'
+        Smoke test for the function 'generate_folium_map_widget'
         """
 
         assert widget_modules.generate_folium_map_widget(
