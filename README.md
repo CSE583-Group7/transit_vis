@@ -32,9 +32,12 @@ Once setup has been completed, the map can be generated and viewed for analysis:
 2. Copy and paste output_map.html (including local file path) into any browser to display output data, or open the output_map.html file located in the top level directory 
 
 Additionally, community members can utilize a jupyter notebook to visualize the transit data.
-1. Open "widget_generate_transit_vis_map.ipynb" in a jupyter notebook 
-2. Enter into the display box destination coordinates, potential home coordinates, minimum salary, and maximum salary.
-3. Copy and paste output_map_widgets.html (including local file path) into any browser to display output data, or open the output_map_widgets.html file located in the top level directory 
+1. From terminal, run jupyter notebook
+2. Open "widget_transit_vis.ipynb"
+3. Press the run button
+4. Enter into the display box potential home and destination coordinates (latitude, longitude separated by a comma)
+5. Enter in minimum salary and maximum salary (as a whole number).
+6. Copy and paste output_map_widgets.html (including local file path) into any browser to display output data, or open the output_map_widgets.html file located in the top level directory 
 
 ### Project Directory Organization
 The project is within the "transit_vis" directory. The project is further organized into three main directories:
@@ -49,16 +52,18 @@ Copies of all files in the "data" directory including files generated during ope
 transit_vis/
   |- README.md
   |- LICENSE.md
-  |- widget_generate_transit_vis_map.ipynb
+  |- widget_transit_vis.ipynb
   |- transit_vis/  
      |- src/
         |- initialize_dynamodb.py
         |- summarize_rds.py
         |- transit_vis.py
+        |- widget_modules.py        
         |- create_gtfs_tables.sql
      |- tests/
         |- test_transit_vis.py
         |- test_backend_helpers.py
+        |- test_widget_modules.py
         |- data/
            |- kcm_routes.geojson
            |- ...
